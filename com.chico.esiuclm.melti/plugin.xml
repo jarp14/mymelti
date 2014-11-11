@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.chico.esiuclm.melti.preferences.MeltiPreferencePage"
+            id="com.esiuclm.melti.preferences.MeltiPreferencePage"
+            name="Melti">
+      </page>
+   </extension>
+   
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.chico.esiuclm.melti.preferences.PreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="com.chico.esiuclm.melti.commands.category"
+            name="Melti">
+      </category>
+      <command
+            categoryId="com.chico.esiuclm.melti.commands.category"
+            id="com.chico.esiuclm.melti.commands.initServer"
+            name="Iniciar escucha">
+      </command>
+      <command
+            categoryId="com.chico.esiuclm.melti.commands.category"
+            id="com.chico.esiuclm.melti.commands.stopServer"
+            name="Parar escucha">
+      </command>
+      <command
+            categoryId="com.chico.esiuclm.melti.commands.category"
+            id="com.chico.esiuclm.melti.commands.restClient"
+            name="Enviar tarea">
+      </command>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="com.chico.esiuclm.melti.handlers.StartServer"
+            commandId="com.chico.esiuclm.melti.commands.initServer">
+      </handler>
+      <handler
+            class="com.chico.esiuclm.melti.handlers.StopServer"
+            commandId="com.chico.esiuclm.melti.commands.stopServer">
+      </handler>
+      <handler
+            class="com.chico.esiuclm.melti.handlers.RestClient"
+            commandId="com.chico.esiuclm.melti.commands.restClient">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.chico.esiuclm.melti.commands.initServer"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+1">
+      </key>
+      <key
+            commandId="com.chico.esiuclm.melti.commands.stopServer"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+2">
+      </key>
+      <key
+            commandId="com.chico.esiuclm.melti.commands.restClient"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+4">
+      </key>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+         <menu
+               id="com.chico.esiuclm.melti.menus.MeltiMenu"
+               label="Melti"
+               mnemonic="M">
+            <command
+                  commandId="com.chico.esiuclm.melti.commands.initServer"
+                  icon="icons/start.png"
+                  id="com.chico.esiuclm.melti.menus.initServer"
+                  mnemonic="S"
+                  style="push">
+            </command>
+            <command
+                  commandId="com.chico.esiuclm.melti.commands.stopServer"
+                  icon="icons/stop.png"
+                  id="com.chico.esiuclm.melti.menus.stopServer"
+                  mnemonic="S"
+                  style="push">
+            </command>
+            <command
+                  commandId="com.chico.esiuclm.melti.commands.restClient"
+                  icon="icons/upload.png"
+                  id="com.chico.esiuclm.melti.menus.restClient"
+                  mnemonic="U"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+         <toolbar
+               id="com.chico.esiuclm.melti.toolbars.menuMelti">
+            <command
+                  commandId="com.chico.esiuclm.melti.commands.initServer"
+                  icon="icons/start.png"
+                  id="com.chico.esiuclm.melti.toolbars.initServer"
+                  style="push"
+                  tooltip="Iniciar escucha">
+            </command>
+            <command
+                  commandId="com.chico.esiuclm.melti.commands.stopServer"
+                  icon="icons/stop.png"
+                  id="com.chico.esiuclm.melti.toolbars.stopServer"
+                  style="push"
+                  tooltip="Parar escucha">
+            </command>
+            <command
+                  commandId="com.chico.esiuclm.melti.commands.restClient"
+                  icon="icons/upload.png"
+                  id="com.chico.esiuclm.melti.toolbars.restClient"
+                  style="push"
+                  tooltip="Enviar tarea">
+            </command>
+         </toolbar>
+      </menuContribution>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="com.chico.esiuclm.melti"
+            name="Melti">
+      </category>
+      <view
+            category="com.chico.esiuclm.melti"
+            class="com.chico.esiuclm.melti.views.StatementView"
+            icon="icons/statement.png"
+            id="com.chico.esiuclm.melti.views.statementView"
+            name="Enunciado"
+            restorable="true">
+      </view>
+      <view
+            category="com.chico.esiuclm.melti"
+            class="com.chico.esiuclm.melti.views.UserView"
+            icon="icons/user.png"
+            id="com.chico.esiuclm.melti.views.userView"
+            name="Usuario"
+            restorable="true">
+      </view>
+   </extension>
+   
+
+</plugin>
