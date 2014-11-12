@@ -24,8 +24,7 @@ import com.chico.esiuclm.melti.MeltiPlugin;
 
 public class MeltiPreferencePage extends FieldEditorPreferencePage
 	implements IWorkbenchPreferencePage {
-
-	// Declaracion de FieldEditors
+	
 	private RadioGroupFieldEditor rolePrefEditor;
 	private StringFieldEditor idPrefEditor, tokenPrefEditor, 
 									keyPrefEditor, secretPrefEditor;	
@@ -46,14 +45,14 @@ public class MeltiPreferencePage extends FieldEditorPreferencePage
 				"Profesor", PreferenceConstants.MELTI_ROLE_PROFESOR }
 		}, getFieldEditorParent());
 		idPrefEditor = new StringFieldEditor(PreferenceConstants.MELTI_USERID, "ID Usuario", getFieldEditorParent());
-		tokenPrefEditor = new StringFieldEditor(PreferenceConstants.MELTI_TOKEN, "Token", getFieldEditorParent());
 		keyPrefEditor = new StringFieldEditor(PreferenceConstants.MELTI_KEY, "Key", getFieldEditorParent());
 		secretPrefEditor = new StringFieldEditor(PreferenceConstants.MELTI_SECRET, "Secret", getFieldEditorParent());
+		tokenPrefEditor = new StringFieldEditor(PreferenceConstants.MELTI_TOKEN, "Token", getFieldEditorParent());
 		addField(rolePrefEditor);
 		addField(idPrefEditor);
-		addField(tokenPrefEditor);
 		addField(keyPrefEditor);
 		addField(secretPrefEditor);
+		addField(tokenPrefEditor);
 	}
 
 	@Override
@@ -75,19 +74,20 @@ public class MeltiPreferencePage extends FieldEditorPreferencePage
 	    	if (event.getSource() == serverPrefEditor)
 	    		checkState();
 	    }
-	}
+	}*/
 	
 	// Se comprueba el estado de las preferencias
 	@Override
 	protected void checkState() {
 		super.checkState();
-		if (serverPrefEditor.getStringValue()!=null && !serverPrefEditor.getStringValue().equals("")) {
+		if (idPrefEditor.getStringValue()!=null && !idPrefEditor.getStringValue().equals("")) {
 			setErrorMessage(null);
 			setValid(true);
 		} else {
-			setErrorMessage("Server cannot be blank!");
+			setErrorMessage("Error: El campo ID usuario no puede estar vacío");
 			setValid(false);
 		}
+		
 	}
 	
 	/*public boolean performOk() {

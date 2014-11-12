@@ -2,6 +2,7 @@ package com.chico.esiuclm.melti.net.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,13 +30,16 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import com.chico.esiuclm.melti.MeltiPlugin;
 import com.chico.esiuclm.melti.exceptions.GenericErrorException;
 import com.chico.esiuclm.melti.exceptions.NotCodeException;
+import com.chico.esiuclm.melti.exceptions.NotProfesorException;
 import com.chico.esiuclm.melti.exceptions.NotStatementException;
-import com.chico.esiuclm.melti.model.MeltiServer;
+import com.chico.esiuclm.melti.exceptions.NotStudentException;
 import com.chico.esiuclm.melti.model.Student;
 import com.chico.esiuclm.melti.net.oauth.OAuthAccessor;
 import com.chico.esiuclm.melti.net.oauth.OAuthConsumer;
+import com.chico.esiuclm.melti.net.oauth.OAuthException;
 import com.chico.esiuclm.melti.net.oauth.OAuthMessage;
 import com.chico.esiuclm.melti.net.oauth.OAuthValidator;
 import com.chico.esiuclm.melti.net.oauth.SimpleOAuthValidator;
@@ -57,7 +61,7 @@ public class BltiServlet extends HttpServlet {
 		/**
 		 *  Informacion de la tarea enviada desde Moodle
 		 */
-		String task_id = request.getParameter("resource_link_id"); // ID del contexto de la tarea
+		String task_id = request.getParameter("resource_link_id"); // ID de la tarea
 		String task_title = request.getParameter("resource_link_title"); // Titulo de la tarea
 		String task_statement_code = request.getParameter("resource_link_description"); // Enunciado y codigo
 		String task_class_name = request.getParameter("custom_nombre"); // Nombre de la clase
@@ -79,55 +83,60 @@ public class BltiServlet extends HttpServlet {
 		String course_label = request.getParameter("context_label"); // Etiqueta del curso
 		
 		/**
-		 * Informacion para posible retorno enviada desde Moodle
+		 * Informacion para posible retorno y calificaciones
 		 */
 		String service_url = request.getParameter("lis_outcome_service_url"); // Direccion de retorno
 		String sourceid = request.getParameter("lis_result_sourceid"); // Datos para retorno
 		
-		Student a = new Student(Integer.parseInt(user_id), user_firstName, user_lastName, user_email, user_role, null);
-		try {
-			a.add();
-		} catch (ClassNotFoundException | SQLException | GenericErrorException e1) {
-			e1.printStackTrace();
-		}
-		
 		/** 
-		 * Comprobacion de la clave secreta
+		 * Comprobaciones de las claves secretas e identidad del usuario entre sistemas
 		 */
-		OAuthMessage oam = OAuthServlet.getMessage(request, null); // Recoge los valores de la peticion
+		String eclipse_user_key = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_key"); // Valor obtenido de las preferencias
+		String eclipse_user_secret = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_secret"); // Valor obtenido de las preferencias
+		OAuthMessage oam = OAuthServlet.getMessage(request, null); // Recoge los valores de la peticion HTTP
 		OAuthValidator oav = new SimpleOAuthValidator();
-		OAuthConsumer cons = new OAuthConsumer("about:blank#OAuth+CallBack+NotUsed", "java", "chico.esiuclm.melti", null);
+		OAuthConsumer cons = new OAuthConsumer("about:blank#OAuth+CallBack+NotUsed", eclipse_user_key, eclipse_user_secret, null); // Insertamos datos de las preferencias
 		OAuthAccessor acc = new OAuthAccessor(cons);
+		
+		// Validacion de credenciales
 		try {
 			oav.validateMessage(oam, acc);
-		} catch(Exception e) {
+		} catch (OAuthException | URISyntaxException e) {
+			e.printStackTrace();
+			doError(request, response, 0);
+			return;
+		}
+
+		// Identidad del usuario
+		try {
+			checkUser(user_email, user_role);
+		} catch (NotProfesorException | NotStudentException | GenericErrorException e2) {
+			e2.printStackTrace();
 			doError(request, response, 0);
 			return;
 		}
 		
-		//MeltiServer.get().createUser(user_id, lis_person_name_given, lis_person_name_family, lis_person_contact_email_primary, userrole);
-		//MeltiServer.get().createUser(user_id, lis_person_name_given, lis_person_name_family, service_url, sourceid);
-		
 		// Capturamos la tarea desde moodle
-		final String task_statement;
-		final String task_code;
+		String task_statement;
+		String task_code;
 		try {
 			task_statement = acquireStatement(task_statement_code);
 			task_code = acquireCode(task_statement_code);
-		} catch (NotStatementException e) {
+		} catch (NotStatementException e3) {
+			e3.printStackTrace();
 			doError(request, response, 1);
 			return;
-		} catch (NotCodeException e) {
+		} catch (NotCodeException e4) {
+			e4.printStackTrace();
 			doError(request, response, 2);
 			return;
 		}
 		
-		// Enviar enunciado y usuarios a sus vistas y mostrarlas
+		// Enviar enunciado a sus vistas y mostrarlas
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 			public void run() {
 				try {
 					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("com.chico.esiuclm.melti.views.statementView");
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("com.chico.esiuclm.melti.views.userView");
 					//MeltiServer.get().getUser(user_id).getTask().setStatement(statement);
 				} catch (PartInitException e) {
 					e.printStackTrace();
@@ -144,6 +153,13 @@ public class BltiServlet extends HttpServlet {
 		
 		// Todo fue ok
 		sayOK(response);
+		
+		Student a = new Student(Integer.parseInt(user_id), user_firstName, user_lastName, user_email, user_role, null);
+		try {
+			a.add();
+		} catch (ClassNotFoundException | SQLException | GenericErrorException e1) {
+			e1.printStackTrace();
+		}
 	}
 	
 	public void doError(HttpServletRequest request, HttpServletResponse response, int errorkey) throws IOException {
@@ -221,7 +237,7 @@ public class BltiServlet extends HttpServlet {
 	    	IPackageFragmentRoot srcFolder = javaProject.getPackageFragmentRoot(folder);
 	     
 	    	// Crear fragmento de paquete
-	    	IPackageFragment fragment = srcFolder.createPackageFragment("(default package)", true, progressMonitor);
+	    	IPackageFragment fragment = srcFolder.createPackageFragment(projectName.toLowerCase(), true, progressMonitor);
 	     
 	    	StringBuffer buffer = new StringBuffer();
 	    	buffer.append("package "+fragment.getElementName()+";\n");
@@ -287,6 +303,26 @@ public class BltiServlet extends HttpServlet {
 		out.println("</center>");
 		out.println("</body>");
 		out.println("</html>");
+	}
+	
+	private void checkUser(String email, String role) throws NotProfesorException, NotStudentException, GenericErrorException {
+		String eclipse_userID = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_id");
+		String eclipse_userRole = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_role");
+	
+		if (!email.equals(eclipse_userID)) { // No coincide el usuario de Moodle y Eclipse
+			throw new GenericErrorException();
+		}
+		
+		if (role.equals("Instuctor")) { // No tiene los privilegios de profesor
+			if (!eclipse_userRole.equals("melti_rprofesor")) 
+				throw new NotProfesorException();
+		} else if (role.equals("Learner")) { // No tiene los privilegios de estudiante
+			if (!eclipse_userRole.equals("melti_rstudent"))
+				throw new NotStudentException();
+		} else {
+			throw new GenericErrorException();
+		}
+		
 	}
 	
 	public void destroy() {}
