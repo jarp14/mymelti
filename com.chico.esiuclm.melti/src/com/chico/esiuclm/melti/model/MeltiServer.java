@@ -12,12 +12,13 @@ import com.chico.esiuclm.melti.net.servlets.BltiServlet;
 
 public class MeltiServer {
 	
-	private static MeltiServer yo;
-	private Server jettyserver;
-	private Hashtable<String, User> users;
-	private Hashtable<String, Task> tasks;
-	private Task the_task;
-	private User [] user;
+	private static MeltiServer yo; // Instancia del servidor
+	private Server jettyserver; // Contenedor de Servlets
+	private Course the_course; // Curso accedido
+	private Hashtable<String, Student> the_students; // Estudiantes del curso
+	private Hashtable<String, Profesor> the_profesors; // Profesores del curso
+	private Hashtable<String, Task> the_tasks; // Tareas del curso
+	//private User [] user;
 	
 	public MeltiServer() {
 		jettyserver = new Server();
@@ -51,20 +52,24 @@ public class MeltiServer {
 		return jettyserver;
 	}
 	
-	public Hashtable<String, User> getUsers() {
-		return users;
+	public Hashtable<String, Student> getStudents() {
+		return the_students;
 	}
 	
 	public Hashtable<String, Task> getTasks() {
-		return tasks;
+		return the_tasks;
 	}
 	
-	public User getUser(String user_id) {
-		return this.users.get(user_id);
+	public Student getStudent(String user_id) {
+		return this.the_students.get(user_id);
+	}
+	
+	public Profesor getProfesor(String user_id) {
+		return this.the_profesors.get(user_id);
 	}
 	
 	public Task getTask(String task_id) {
-		return this.tasks.get(task_id);
+		return this.the_tasks.get(task_id);
 	}
 	
 	/*public User[] getUser() {

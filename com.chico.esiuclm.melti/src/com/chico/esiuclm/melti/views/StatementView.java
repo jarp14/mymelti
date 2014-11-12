@@ -27,7 +27,7 @@ public class StatementView extends ViewPart {
 		final Document statement;
 		viewer = new TextViewer(parent, SWT.MULTI | SWT.V_SCROLL);
 		viewer.setEditable(false);
-		statement = new Document(MeltiServer.get().getTask().getStatement());
+		statement = new Document("Enunciado del problema a resolver por el alumno");
 		viewer.setDocument(statement);
 		
 		PropertyChangeListener propertyChangeListener = new PropertyChangeListener() {
@@ -39,7 +39,7 @@ public class StatementView extends ViewPart {
 		      }
 		};
 		
-		MeltiServer.get().getTask().addPropertyChangeListener(propertyChangeListener);
+		//MeltiServer.get().getTask().addPropertyChangeListener(propertyChangeListener);
 	}
 	
 	@Override

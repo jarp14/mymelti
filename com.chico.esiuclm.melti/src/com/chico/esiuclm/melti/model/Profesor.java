@@ -4,7 +4,7 @@ public class Profesor extends User {
 	
 	private String token;
 	
-	public Profesor(String id, String first, String last, String email, String role, String token) {
+	public Profesor(int id, String first, String last, String email, String role, String token) {
 		super(id, first, last, email, role);
 		this.token = token;
 	}
@@ -17,5 +17,4 @@ public class Profesor extends User {
 		this.token = token;
 	}
 	
-	/* ACCIONES PROPIAS DE UN PROFESOR */	
 }

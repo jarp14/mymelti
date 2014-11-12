@@ -18,11 +18,11 @@ public class UserLabelProvider extends LabelProvider implements ITableLabelProvi
 		User user = (User) element;
 		switch(columnIndex) {
 			case 0:
-				return user.getId();
+				//return user.getID();
 			case 1:
-				return user.getName();
+				return user.getFirst_name();
 			case 2:
-				return user.getFName();
+				return user.getLast_name();
 			case 3:
 				return user.getEmail();
 			case 4:

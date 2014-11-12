@@ -1,14 +1,13 @@
 package com.chico.esiuclm.melti.model;
 
-import com.chico.esiuclm.melti.persistence.DAOUser;
 
-public class User extends ModelObject {
+public abstract class User extends ModelObject {
 
-	protected String id, email;
+	protected int id;
 	protected String first_name, last_name;
-	protected String role;
+	protected String email, role;
 	
-	public User(String id, String first, String last, String email, String role) {
+	public User(int id, String first, String last, String email, String role) {
 		this.id = id;
 		this.first_name = first;
 		this.last_name = last;
@@ -16,11 +15,11 @@ public class User extends ModelObject {
 		this.role = role;
 	}
 	
-	public String getID() {
+	public int getID() {
 		return id;
 	}
 	
-	public void setID(String id) {
+	public void setID(int id) {
 		firePropertyChange("user_id", this.id, this.id = id);
 	}
 	
@@ -56,10 +55,6 @@ public class User extends ModelObject {
 		this.role = role;
 	}
 	
-	public void addUserDB(String id) {
-		DAOUser.addUserDB(this);
-	}
-	
 	public String toString() {
 		return this.first_name+" "+this.last_name+" : "+this.email;
 	}
@@ -68,7 +63,5 @@ public class User extends ModelObject {
 		return (o instanceof User && 
 				((User)o).email.equals(this.email));
 	}
-	
-	/* ACCIONES COMUNES DE UN USUARIO CUALQUIERA */
 	
 }

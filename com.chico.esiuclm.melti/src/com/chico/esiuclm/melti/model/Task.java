@@ -1,29 +1,23 @@
 package com.chico.esiuclm.melti.model;
 
-import java.io.File;
-
 public class Task extends ModelObject {
 	
-	private String id, statement;
-	private File code;
+	private int id; 
+	private String statement, code;
+	private String grade;
 	
-	public Task( String string, Object object2) {
-		this.id = null;
-		this.statement = null;
-		this.code = null;
-	}
-	
-	public Task(String id, String st, File co) {
+	public Task(int id, String st, String co) {
 		this. id = id;
 		this.statement = st;
 		this.code = co;
+		this.grade = null;
 	}
 	
-	public String getId() {
+	public int getID() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setID(int id) {
 		this.id = id;
 	}
 
@@ -35,12 +29,12 @@ public class Task extends ModelObject {
 		firePropertyChange("statement", this.statement, this.statement = s);
 	}
 	
-	public File getCode() {
+	public String getCode() {
 		return code;
 	}
 	
-	public void setCode(File c) {
-		this.code = c;
+	public void setCode(String code) {
+		this.code = code;
 	}
 	
 	public boolean equals(Object o) {
@@ -49,7 +43,7 @@ public class Task extends ModelObject {
 	}
 	
 	public String toString() {
-		return "Task";
+		return "Task "+this.getID();
 	}
 	
 }

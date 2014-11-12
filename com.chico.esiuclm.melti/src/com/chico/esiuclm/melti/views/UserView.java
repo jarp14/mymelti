@@ -22,7 +22,7 @@ public class UserView extends ViewPart {
 		table.setLinesVisible(true);
 		
 		String[] columnNames = new String[] {
-				"Id", "Nombre", "Apellidos", "E-mail", "Rol" };
+				"ID", "Nombre", "Apellidos", "E-mail", "Rol" };
 		int[] columnWidths = new int[] { 50, 100, 100, 100, 100 };
 		int[] columnAlignments = new int[] { SWT.LEFT , SWT.LEFT , SWT.LEFT , SWT.LEFT , SWT.LEFT };
 		
@@ -34,7 +34,7 @@ public class UserView extends ViewPart {
 		
 		viewer.setLabelProvider(new UserLabelProvider());
 		viewer.setContentProvider(new ArrayContentProvider());		
-		viewer.setInput(MeltiServer.get().getUser());
+		//viewer.setInput(MeltiServer.get().getUser());
 		
 	}
 

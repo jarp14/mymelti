@@ -2,6 +2,7 @@ package com.chico.esiuclm.melti.net.servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,9 +29,11 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
+import com.chico.esiuclm.melti.exceptions.GenericErrorException;
 import com.chico.esiuclm.melti.exceptions.NotCodeException;
 import com.chico.esiuclm.melti.exceptions.NotStatementException;
 import com.chico.esiuclm.melti.model.MeltiServer;
+import com.chico.esiuclm.melti.model.Student;
 import com.chico.esiuclm.melti.net.oauth.OAuthAccessor;
 import com.chico.esiuclm.melti.net.oauth.OAuthConsumer;
 import com.chico.esiuclm.melti.net.oauth.OAuthMessage;
@@ -50,36 +53,48 @@ public class BltiServlet extends HttpServlet {
 		doPost(request, response);
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {	
-		// Requeridos
-		String statement_code = request.getParameter("resource_link_description");
-		String class_name = request.getParameter("custom_nombre");
-		String userrole = request.getParameter("roles");
-		String lis_person_contact_email_primary = request.getParameter("lis_person_contact_email_primary"); // R. E-mail del usuario
-		//String lti_version = request.getParameter("lti_version"); // REQUERIDO. Version LTI: LTI-1p0 (BasicLTI)
-		//String lti_message_type = request.getParameter("lti_message_type"); // Tipo de mensaje LTI: basic-lti-launch-request
-		String resource_link_id = request.getParameter("resource_link_id"); // REQUERIDO. ID único para la app
-		final String user_id = request.getParameter("user_id"); // ID único del usuario, debe considerarse opaco/oculto
-		String lis_person_name_full = request.getParameter("lis_person_name_full");
-		String lis_person_name_given = request.getParameter("lis_person_name_given");
-		String lis_person_name_family = request.getParameter("lis_person_name_family");
-		String service_url = request.getParameter("lis_outcome_service_url"); // Enviar notas de vuelta
-		String sourceid = request.getParameter("lis_result_sourceid"); // A donde enviar las notas de regreso MUY IMPORTANTE
-		String resource_title = request.getParameter("resource_link_title");
-		String context_id = request.getParameter("context_id");
-		String context_label = request.getParameter("context_label");
-		String context_title = request.getParameter("context_title");
-		String launch_presentation_locale = request.getParameter("launch_presentation_locale");		
-		//String oauth_signature_method = request.getParameter("oauth_signature_method");
-		//String launch_presentation_return_url = request.getParameter("launch_presentation_return_url");
-		//String oauth_nonce = request.getParameter("oauth_nonce");
-		//String oauth_timestamp = request.getParameter("oauth_timestamp");
-		//String oauth_signature = request.getParameter("oauth_signature");
-		//String oauth_callback = request.getParameter("oauth_callback");	
-		String tool_consumer_instance_guid = request.getParameter("tool_consumer_instance_guid");
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {			
+		/**
+		 *  Informacion de la tarea enviada desde Moodle
+		 */
+		String task_id = request.getParameter("resource_link_id"); // ID del contexto de la tarea
+		String task_title = request.getParameter("resource_link_title"); // Titulo de la tarea
+		String task_statement_code = request.getParameter("resource_link_description"); // Enunciado y codigo
+		String task_class_name = request.getParameter("custom_nombre"); // Nombre de la clase
 		
-		// Comprobamos la clave secreta
-		OAuthMessage oam = OAuthServlet.getMessage(request, null);
+		/**
+		 *  Informacion del usuario enviada desde Moodle
+		 */
+		String user_id = request.getParameter("user_id"); // ID unico del usuario
+		String user_role = request.getParameter("roles"); // Rol del usuario usando el sistema
+		String user_email = request.getParameter("lis_person_contact_email_primary"); // E-mail del usuario
+		String user_firstName = request.getParameter("lis_person_name_given"); // Nombre del usuario
+		String user_lastName = request.getParameter("lis_person_name_family"); // Apellidos del usuario
+		
+		/**
+		 *  Informacion del curso enviada desde Moodle
+		 */
+		String course_id = request.getParameter("context_id"); // ID del curso
+		String course_title = request.getParameter("context_title"); // Titulo del curso
+		String course_label = request.getParameter("context_label"); // Etiqueta del curso
+		
+		/**
+		 * Informacion para posible retorno enviada desde Moodle
+		 */
+		String service_url = request.getParameter("lis_outcome_service_url"); // Direccion de retorno
+		String sourceid = request.getParameter("lis_result_sourceid"); // Datos para retorno
+		
+		Student a = new Student(Integer.parseInt(user_id), user_firstName, user_lastName, user_email, user_role, null);
+		try {
+			a.add();
+		} catch (ClassNotFoundException | SQLException | GenericErrorException e1) {
+			e1.printStackTrace();
+		}
+		
+		/** 
+		 * Comprobacion de la clave secreta
+		 */
+		OAuthMessage oam = OAuthServlet.getMessage(request, null); // Recoge los valores de la peticion
 		OAuthValidator oav = new SimpleOAuthValidator();
 		OAuthConsumer cons = new OAuthConsumer("about:blank#OAuth+CallBack+NotUsed", "java", "chico.esiuclm.melti", null);
 		OAuthAccessor acc = new OAuthAccessor(cons);
@@ -93,13 +108,12 @@ public class BltiServlet extends HttpServlet {
 		//MeltiServer.get().createUser(user_id, lis_person_name_given, lis_person_name_family, lis_person_contact_email_primary, userrole);
 		//MeltiServer.get().createUser(user_id, lis_person_name_given, lis_person_name_family, service_url, sourceid);
 		
-		
 		// Capturamos la tarea desde moodle
-		final String statement;
-		final String code;
+		final String task_statement;
+		final String task_code;
 		try {
-			statement = acquireStatement(statement_code);
-			code = acquireCode(statement_code);
+			task_statement = acquireStatement(task_statement_code);
+			task_code = acquireCode(task_statement_code);
 		} catch (NotStatementException e) {
 			doError(request, response, 1);
 			return;
@@ -123,46 +137,16 @@ public class BltiServlet extends HttpServlet {
 		
 		// Creamos proyecto Java
 		try {
-			createProject(resource_title, code, checkFileName(class_name));
+			createProject(task_title, task_code, checkFileName(task_class_name));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
 		// Todo fue ok
 		sayOK(response);
-		
-		/*if (userrole==null) userrole = "";
-		userrole = userrole.toLowerCase();
-        boolean isInstructor = userrole.indexOf("instructor") >= 0;
-        boolean isStudent = userrole.indexOf("student") >= 0;
-
-        // Contextos del usuario/curso en moodle
-		String userKey = null;
-		if ( user_id != null ) {
-			userKey = oauth_consumer_key + ":" + user_id;
-		}
-		String courseKey = null;
-		if ( context_id != null ) {
-			courseKey = oauth_consumer_key + ":" + context_id;
-		}
-		String courseName = context_id;
-        if ( request.getParameter("context_title") != null ) 
-        	courseName = request.getParameter("context_title");
-        if ( request.getParameter("context_label") != null )
-            courseName = request.getParameter("context_label");*/
 	}
 	
 	public void doError(HttpServletRequest request, HttpServletResponse response, int errorkey) throws IOException {
-		//String return_url = request.getParameter("launch_presentation_return_url"); // Recogemos la url de donde veniamos
-	       	/*if ( return_url != null && return_url.length() > 1 ) {
-	       		if ( return_url.indexOf('?') > 1 ) {
-	               	return_url += "&lti_msg=" + URLEncoder.encode(s);
-	            } else {
-	          		return_url += "?lti_msg=" + URLEncoder.encode(s);
-	            }
-	            response.sendRedirect(return_url);
-	            return;
-	       	}*/
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
 		out.println("<html>");
@@ -203,12 +187,10 @@ public class BltiServlet extends HttpServlet {
 				out.println("</body>");
 				out.println("</html>");
 				break;
-		}				
-		//response.sendRedirect(return_url); // No permitimos entrar y regresamos
-		//return;
+		}
 	}
 	
-	private IJavaProject createProject(String projectName, String fileCode, String fileName) throws Exception {
+	private void createProject(String projectName, String fileCode, String fileName) throws Exception {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 	    IProject project = root.getProject(projectName);
 	    IJavaProject javaProject = null;
@@ -239,16 +221,14 @@ public class BltiServlet extends HttpServlet {
 	    	IPackageFragmentRoot srcFolder = javaProject.getPackageFragmentRoot(folder);
 	     
 	    	// Crear fragmento de paquete
-	    	IPackageFragment fragment = srcFolder.createPackageFragment("src", true, progressMonitor);
+	    	IPackageFragment fragment = srcFolder.createPackageFragment("(default package)", true, progressMonitor);
 	     
 	    	StringBuffer buffer = new StringBuffer();
 	    	buffer.append("package "+fragment.getElementName()+";\n");
 	    	buffer.append(fileCode);
 	    	
 	    	fragment.createCompilationUnit(fileName, buffer.toString(), false, progressMonitor);
-	    } // TODO lanzamos algun tipo de pregunta para sobreescribir o no?
-	    
-	    return javaProject;
+	    }
 	}
 	
 	private String acquireStatement(String st_code) throws NotStatementException {

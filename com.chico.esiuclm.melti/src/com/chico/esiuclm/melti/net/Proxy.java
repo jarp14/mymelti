@@ -1,6 +1,5 @@
 package com.chico.esiuclm.melti.net;
 
-
-public class Proxy {
+public class Proxy implements IMeltiServer {
 
 }
