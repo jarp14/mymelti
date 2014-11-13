@@ -1,4 +1,4 @@
-package com.chico.esiuclm.melti.swt;
+package com.chico.esiuclm.melti.gui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;

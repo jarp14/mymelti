@@ -1,8 +1,10 @@
 package com.chico.esiuclm.melti.preferences;
 
+import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
@@ -31,6 +33,7 @@ public class MeltiPreferencePage extends FieldEditorPreferencePage
 	
 	public MeltiPreferencePage() {
 		super(GRID);
+		setPreferenceStore(MeltiPlugin.getDefault().getPreferenceStore());
 	}
 	
 	/**
@@ -40,14 +43,18 @@ public class MeltiPreferencePage extends FieldEditorPreferencePage
 	 * restore itself.
 	 */
 	public void createFieldEditors() {
-		rolePrefEditor = new RadioGroupFieldEditor(PreferenceConstants.MELTI_ROLE, "Rol", 1,
-			new String[][] { { "Alumno", PreferenceConstants.MELTI_ROLE_STUDENT }, {
-				"Profesor", PreferenceConstants.MELTI_ROLE_PROFESOR }
-		}, getFieldEditorParent());
-		idPrefEditor = new StringFieldEditor(PreferenceConstants.MELTI_USERID, "ID Usuario", getFieldEditorParent());
-		keyPrefEditor = new StringFieldEditor(PreferenceConstants.MELTI_KEY, "Key", getFieldEditorParent());
-		secretPrefEditor = new StringFieldEditor(PreferenceConstants.MELTI_SECRET, "Secret", getFieldEditorParent());
-		tokenPrefEditor = new StringFieldEditor(PreferenceConstants.MELTI_TOKEN, "Token", getFieldEditorParent());
+		rolePrefEditor = new RadioGroupFieldEditor(
+				IPreferenceConstants.MELTI_ROLE, 
+				"Rol", 
+				1,
+				new String[][] { 
+						{ "Alumno", IPreferenceConstants.MELTI_ROLE_STUDENT }, 
+						{ "Profesor", IPreferenceConstants.MELTI_ROLE_PROFESOR } }, 
+				getFieldEditorParent());
+		idPrefEditor = new StringFieldEditor(IPreferenceConstants.MELTI_USERID, "ID Usuario", getFieldEditorParent());
+		keyPrefEditor = new StringFieldEditor(IPreferenceConstants.MELTI_KEY, "Key", getFieldEditorParent());
+		secretPrefEditor = new StringFieldEditor(IPreferenceConstants.MELTI_SECRET, "Secret", getFieldEditorParent());
+		tokenPrefEditor = new StringFieldEditor(IPreferenceConstants.MELTI_TOKEN, "Token", getFieldEditorParent());
 		addField(rolePrefEditor);
 		addField(idPrefEditor);
 		addField(keyPrefEditor);
@@ -56,25 +63,20 @@ public class MeltiPreferencePage extends FieldEditorPreferencePage
 	}
 
 	@Override
-	public void init(IWorkbench workbench) {
-		setPreferenceStore(MeltiPlugin.getDefault().getPreferenceStore());
-		//setDescription("Configuración");
-	}
+	public void init(IWorkbench workbench) { }
 	
-	/* Si existen cambios en las preferencias se avisa del evento 
+	/** 
+	 * Si existen cambios en las preferencias se avisa del evento 
 	 * para checkear el estado 
 	 */
-	/*@Override
+	@Override
 	public void propertyChange(PropertyChangeEvent event) {
-		//TODO comprobar que se introduzca un número en el puerto
-		//TODO formato correcto del host por ejemplo...
-		//TODO probar todas las opciones posibles
 		super.propertyChange(event);
 	    if (event.getProperty().equals(FieldEditor.VALUE)) {
-	    	if (event.getSource() == serverPrefEditor)
+	    	if (event.getSource() == idPrefEditor)
 	    		checkState();
 	    }
-	}*/
+	}
 	
 	// Se comprueba el estado de las preferencias
 	@Override
@@ -84,27 +86,10 @@ public class MeltiPreferencePage extends FieldEditorPreferencePage
 			setErrorMessage(null);
 			setValid(true);
 		} else {
-			setErrorMessage("Error: El campo ID usuario no puede estar vacío");
+			setErrorMessage("Error: El campo ID usuario no puede estar vacio");
 			setValid(false);
 		}
 		
 	}
-	
-	/*public boolean performOk() {
-		this.storeValues();
-		//return true;
-		return super.performOk();
-	}*/
-	
-	/* 
-	 * Guardamos todos los valores de las preferencias
-	 * para poder usarlos en diferentes sesiones 
-	 */
-	/*private void storeValues() {
-		serverPrefEditor.store();
-		portPrefEditor.store();
-		modeRolePrefEditor.store();
-		IDPrefEditor.store();
-	}*/
 	
 }

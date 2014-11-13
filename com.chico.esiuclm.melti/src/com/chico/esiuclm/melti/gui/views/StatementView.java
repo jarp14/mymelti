@@ -1,4 +1,4 @@
-package com.chico.esiuclm.melti.views;
+package com.chico.esiuclm.melti.gui.views;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

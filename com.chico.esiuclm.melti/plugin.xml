@@ -118,7 +118,7 @@
       <menuContribution
             locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
          <toolbar
-               id="com.chico.esiuclm.melti.toolbars.menuMelti">
+               id="meltiToolbar">
             <command
                   commandId="com.chico.esiuclm.melti.commands.initServer"
                   icon="icons/start.png"
@@ -152,7 +152,7 @@
       </category>
       <view
             category="com.chico.esiuclm.melti"
-            class="com.chico.esiuclm.melti.views.StatementView"
+            class="com.chico.esiuclm.melti.gui.views.StatementView"
             icon="icons/statement.png"
             id="com.chico.esiuclm.melti.views.statementView"
             name="Enunciado"
@@ -160,7 +160,7 @@
       </view>
       <view
             category="com.chico.esiuclm.melti"
-            class="com.chico.esiuclm.melti.views.UserView"
+            class="com.chico.esiuclm.melti.gui.views.UserView"
             icon="icons/user.png"
             id="com.chico.esiuclm.melti.views.userView"
             name="Usuario"

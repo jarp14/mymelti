@@ -1,4 +1,4 @@
-package com.chico.esiuclm.melti.views;
+package com.chico.esiuclm.melti.gui.views;
 
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;

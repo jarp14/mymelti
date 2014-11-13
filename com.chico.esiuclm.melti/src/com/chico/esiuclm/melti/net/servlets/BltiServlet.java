@@ -132,6 +132,13 @@ public class BltiServlet extends HttpServlet {
 			return;
 		}
 		
+		// Todas las comprobaciones resultaron exitosas
+		sayOK(response);
+		
+		/**
+		 * Generacion de objetos para su manipulacion en la sesion
+		 * Manipulacion de la informacion recibida
+		 */
 		// Enviar enunciado a sus vistas y mostrarlas
 		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
 			public void run() {
@@ -150,9 +157,6 @@ public class BltiServlet extends HttpServlet {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		// Todo fue ok
-		sayOK(response);
 		
 		Student a = new Student(Integer.parseInt(user_id), user_firstName, user_lastName, user_email, user_role, null);
 		try {
@@ -247,6 +251,7 @@ public class BltiServlet extends HttpServlet {
 	    }
 	}
 	
+	// Metodo para capturar y limpiar el enunciado enviado desde Moodle
 	private String acquireStatement(String st_code) throws NotStatementException {
 		String statement;
 		Pattern p = Pattern.compile("_[Ii][Nn][Ii][Cc][Ii][Oo]_.*_[Ff][Ii][Nn]_", Pattern.DOTALL);
@@ -262,6 +267,7 @@ public class BltiServlet extends HttpServlet {
 		return HTMLUtil.textFromHTML(statement);
 	}
 	
+	// Metodo para capturar y limpiar el codigo enviado desde Moodle
 	private String acquireCode(String st_code) throws NotCodeException {
 		String code;
 		String [] c = st_code.split("_[Ff][Ii][Nn]_");
@@ -272,6 +278,7 @@ public class BltiServlet extends HttpServlet {
 		return HTMLUtil.textFromHTML(code);
 	}
 	
+	// Metodo para capturar o generar el nombre de la clase de la tarea
 	private String checkFileName(String fileName) {
 		Pattern p = Pattern.compile("[a-zA-Z]*.java");
 		if(fileName!=null) {
@@ -292,6 +299,7 @@ public class BltiServlet extends HttpServlet {
 		return fileName;
 	}
 	
+	// Informamos de que las comprobaciones fueron exitosas
 	private void sayOK(HttpServletResponse response) throws IOException {
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
@@ -305,15 +313,16 @@ public class BltiServlet extends HttpServlet {
 		out.println("</html>");
 	}
 	
+	// Comprobaciones relacionadas con las credenciales del usuario
 	private void checkUser(String email, String role) throws NotProfesorException, NotStudentException, GenericErrorException {
-		String eclipse_userID = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_id");
-		String eclipse_userRole = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_role");
+		String eclipse_userID = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_id"); // ID de las preferencias en Eclipse
+		String eclipse_userRole = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_role"); // Rol de las preferencias en Eclipse
 	
 		if (!email.equals(eclipse_userID)) { // No coincide el usuario de Moodle y Eclipse
 			throw new GenericErrorException();
 		}
 		
-		if (role.equals("Instuctor")) { // No tiene los privilegios de profesor
+		if (role.equals("Instructor")) { // No tiene los privilegios de profesor
 			if (!eclipse_userRole.equals("melti_rprofesor")) 
 				throw new NotProfesorException();
 		} else if (role.equals("Learner")) { // No tiene los privilegios de estudiante
