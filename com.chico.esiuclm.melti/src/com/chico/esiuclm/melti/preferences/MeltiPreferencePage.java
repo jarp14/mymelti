@@ -1,5 +1,8 @@
 package com.chico.esiuclm.melti.preferences;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.RadioGroupFieldEditor;
@@ -73,23 +76,70 @@ public class MeltiPreferencePage extends FieldEditorPreferencePage
 	public void propertyChange(PropertyChangeEvent event) {
 		super.propertyChange(event);
 	    if (event.getProperty().equals(FieldEditor.VALUE)) {
-	    	if (event.getSource() == idPrefEditor)
-	    		checkState();
+	    	if (event.getSource() == idPrefEditor) {
+	    		checkState(0);
+	    	} else if (event.getSource() == keyPrefEditor) {
+	    		checkState(1);
+	    	} else if (event.getSource() == secretPrefEditor) {
+	    		checkState(2);
+	    	}
 	    }
 	}
 	
 	// Se comprueba el estado de las preferencias
-	@Override
-	protected void checkState() {
+	protected void checkState(int editor) {
 		super.checkState();
-		if (idPrefEditor.getStringValue()!=null && !idPrefEditor.getStringValue().equals("")) {
-			setErrorMessage(null);
-			setValid(true);
-		} else {
-			setErrorMessage("Error: El campo ID usuario no puede estar vacio");
-			setValid(false);
-		}
 		
+		switch(editor) {
+			case 0:
+				if (idPrefEditor.getStringValue()!=null && !idPrefEditor.getStringValue().equals("")) {
+					if(validateEmail(idPrefEditor.getStringValue())) {
+						setErrorMessage(null);
+						setValid(true);
+					} else {
+						setErrorMessage("Aviso: ID usuario no es un email válido");
+						setValid(false);
+					}
+				} else {
+					setErrorMessage("Aviso: ID usuario no puede estar vacío");
+					setValid(false);
+				}
+				break;
+			case 1:
+				if (keyPrefEditor.getStringValue()!=null && !keyPrefEditor.getStringValue().equals("")) {
+					setErrorMessage(null);
+					setValid(true);
+				} else {
+					setErrorMessage("Aviso: Key no puede estar vacío");
+					setValid(false);
+				}
+				break;
+			case 2:
+				if (secretPrefEditor.getStringValue()!=null && !secretPrefEditor.getStringValue().equals("")) {
+					setErrorMessage(null);
+					setValid(true);
+				} else {
+					setErrorMessage("Aviso: Secret no puede estar vacío");
+					setValid(false);
+				}
+				break;
+				
+			default:
+				break;
+		}		
+	}
+	
+	// Comprueba si el String introducido es un email valido
+	private boolean validateEmail(String email) {
+		String PATTERN_EMAIL = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+	            + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+		
+		// Compila la expresion regular en un patron
+		Pattern pattern = Pattern.compile(PATTERN_EMAIL);
+		// Comprueba el patron sobre el email
+		Matcher matcher = pattern.matcher(email);
+		
+		return matcher.matches();
 	}
 	
 }

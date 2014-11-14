@@ -318,15 +318,15 @@ public class BltiServlet extends HttpServlet {
 		String eclipse_userID = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_id"); // ID de las preferencias en Eclipse
 		String eclipse_userRole = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_role"); // Rol de las preferencias en Eclipse
 	
-		if (!email.equals(eclipse_userID)) { // No coincide el usuario de Moodle y Eclipse
+		if (!email.equals(eclipse_userID)) { // No coinciden el usuario de Moodle y Eclipse
 			throw new GenericErrorException();
 		}
 		
-		if (role.equals("Instructor")) { // No tiene los privilegios de profesor
-			if (!eclipse_userRole.equals("melti_rprofesor")) 
+		if (role.equals("Instructor")) {
+			if (!eclipse_userRole.equals("melti_rprofesor"))  // No tiene los privilegios de profesor
 				throw new NotProfesorException();
-		} else if (role.equals("Learner")) { // No tiene los privilegios de estudiante
-			if (!eclipse_userRole.equals("melti_rstudent"))
+		} else if (role.equals("Learner")) { 
+			if (!eclipse_userRole.equals("melti_rstudent")) // No tiene los privilegios de estudiante
 				throw new NotStudentException();
 		} else {
 			throw new GenericErrorException();
