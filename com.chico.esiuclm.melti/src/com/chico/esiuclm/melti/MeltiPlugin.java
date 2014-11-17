@@ -4,6 +4,8 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import com.chico.esiuclm.melti.gui.Controller;
+
 /**
  * The activator class controls the plug-in life cycle
  */
@@ -28,6 +30,7 @@ public class MeltiPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {        
 		super.start(context);
 		plugin = this;
+		Controller.get(); // Genera un controlador con los valores iniciales de las vistas
 	}
 
 	/*

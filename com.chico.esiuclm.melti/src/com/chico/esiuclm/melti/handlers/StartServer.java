@@ -25,17 +25,17 @@ public class StartServer extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 		
-		if(MeltiServer.get().getServer().getState() != "STARTED") {
+		if (MeltiServer.get().getJettyServer().getState() != "STARTED") {
 			try {
-				MeltiServer.get().getServer().start();
+				MeltiServer.get().getJettyServer().start();
 				MessageDialog.openInformation(window.getShell(), "Melti",
-						"Escucha iniciada con éxito");
+													"Escucha iniciada con éxito");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		} else {
 			MessageDialog.openInformation(window.getShell(), "Melti",
-					"Ya se encuentra iniciada");
+													"La escucha ya se encuentra iniciada");
 		}
 		
 		return null;

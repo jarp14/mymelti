@@ -36,7 +36,12 @@ import com.chico.esiuclm.melti.exceptions.NotCodeException;
 import com.chico.esiuclm.melti.exceptions.NotProfesorException;
 import com.chico.esiuclm.melti.exceptions.NotStatementException;
 import com.chico.esiuclm.melti.exceptions.NotStudentException;
+import com.chico.esiuclm.melti.gui.Controller;
+import com.chico.esiuclm.melti.model.Course;
+import com.chico.esiuclm.melti.model.Profesor;
 import com.chico.esiuclm.melti.model.Student;
+import com.chico.esiuclm.melti.model.Task;
+import com.chico.esiuclm.melti.net.IMeltiServer;
 import com.chico.esiuclm.melti.net.oauth.OAuthAccessor;
 import com.chico.esiuclm.melti.net.oauth.OAuthConsumer;
 import com.chico.esiuclm.melti.net.oauth.OAuthException;
@@ -47,6 +52,8 @@ import com.chico.esiuclm.melti.net.oauth.server.OAuthServlet;
 
 @SuppressWarnings("serial")
 public class BltiServlet extends HttpServlet {
+	
+	private IMeltiServer server;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -138,32 +145,30 @@ public class BltiServlet extends HttpServlet {
 		/**
 		 * Generacion de objetos para su manipulacion en la sesion
 		 * Manipulacion de la informacion recibida
-		 */
-		// Enviar enunciado a sus vistas y mostrarlas
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			public void run() {
-				try {
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("com.chico.esiuclm.melti.views.statementView");
-					//MeltiServer.get().getUser(user_id).getTask().setStatement(statement);
-				} catch (PartInitException e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		
+		 */		
 		// Creamos proyecto Java
 		try {
-			createProject(task_title, task_code, checkFileName(task_class_name));
+			createProject(task_title, user_id, task_id, task_code, checkFileName(task_class_name));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		Student a = new Student(Integer.parseInt(user_id), user_firstName, user_lastName, user_email, user_role, null);
-		try {
-			a.add();
+		// Instanciamos los objetos
+		Task active_task = new Task(Integer.parseInt(task_id), task_statement, task_code);
+		Controller.get().updateTaskForView(active_task);
+		/*	Course active_course = new Course(Integer.parseInt(course_id), course_title, course_label);
+		if (user_role.equals("Instructor")) {
+			Profesor active_profesor = new Profesor(Integer.parseInt(user_id), user_firstName, user_lastName, user_email, user_role, task_code);
+		} else if (user_role.equals("Learner")) {
+			Student active_student = new Student(Integer.parseInt(user_id), user_firstName, user_lastName, user_email, user_role, active_task);
+		}*/
+		
+		
+		/*try {
+			active_student.add();
 		} catch (ClassNotFoundException | SQLException | GenericErrorException e1) {
 			e1.printStackTrace();
-		}
+		}*/
 	}
 	
 	public void doError(HttpServletRequest request, HttpServletResponse response, int errorkey) throws IOException {
@@ -210,9 +215,9 @@ public class BltiServlet extends HttpServlet {
 		}
 	}
 	
-	private void createProject(String projectName, String fileCode, String fileName) throws Exception {
+	private void createProject(String projectName, String user_id, String task_id, String fileCode, String fileName) throws Exception {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-	    IProject project = root.getProject(projectName);
+	    IProject project = root.getProject(projectName+"_"+user_id+"_"+task_id); // Para asociarlo al usuario
 	    IJavaProject javaProject = null;
 	    IProgressMonitor progressMonitor = new NullProgressMonitor();
 	    if(!project.exists()) {
@@ -331,7 +336,6 @@ public class BltiServlet extends HttpServlet {
 		} else {
 			throw new GenericErrorException();
 		}
-		
 	}
 	
 	public void destroy() {}

@@ -4,13 +4,11 @@ public class Task extends ModelObject {
 	
 	private int id; 
 	private String statement, code;
-	private String grade;
 	
 	public Task(int id, String st, String co) {
 		this. id = id;
 		this.statement = st;
 		this.code = co;
-		this.grade = null;
 	}
 	
 	public int getID() {
@@ -25,7 +23,7 @@ public class Task extends ModelObject {
 		return statement;
 	}
 	
-	public void setStatement(String s) {
+	public void setStatement(String s) { // Lanza una llamada para la vista StatementView
 		firePropertyChange("statement", this.statement, this.statement = s);
 	}
 	
@@ -35,15 +33,6 @@ public class Task extends ModelObject {
 	
 	public void setCode(String code) {
 		this.code = code;
-	}
-	
-	public boolean equals(Object o) {
-		return (o instanceof Task && 
-				((Task)o).getStatement().equals(this.statement));
-	}
-	
-	public String toString() {
-		return "Task "+this.getID();
 	}
 	
 }

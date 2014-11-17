@@ -20,9 +20,9 @@ public class StopServer extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 		
-		if(MeltiServer.get().getServer().getState().equals("STARTED")) {
+		if(MeltiServer.get().getJettyServer().getState().equals("STARTED")) {
 			try {
-				MeltiServer.get().getServer().stop();
+				MeltiServer.get().getJettyServer().stop();
 				MessageDialog.openInformation(window.getShell(), "Melti",
 						"Escucha pausada con éxito");
 			} catch (Exception e) {
@@ -30,7 +30,7 @@ public class StopServer extends AbstractHandler {
 			}
 		} else {
 			MessageDialog.openInformation(window.getShell(), "Melti",
-					"Ya se encuentra pausada");
+					"La escucha ya se encuentra pausada");
 		}
 		
 		return null;

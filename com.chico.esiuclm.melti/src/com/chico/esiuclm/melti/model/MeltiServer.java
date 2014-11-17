@@ -14,13 +14,26 @@ public class MeltiServer {
 	
 	private static MeltiServer yo; // Instancia del servidor
 	private Server jettyserver; // Contenedor de Servlets
-	private Course the_course; // Curso accedido
 	private Hashtable<String, Student> the_students; // Estudiantes del curso
 	private Hashtable<String, Profesor> the_profesors; // Profesores del curso
 	private Hashtable<String, Task> the_tasks; // Tareas del curso
-	//private User [] user;
 	
 	public MeltiServer() {
+		initJettyServer();
+	}
+	
+	public static MeltiServer get() {
+		if (yo==null) {
+			yo = new MeltiServer();
+		}
+		return yo;
+	}
+	
+	public Server getJettyServer() {
+		return jettyserver;
+	}
+	
+	private void initJettyServer() {
 		jettyserver = new Server();
 		
 		SelectChannelConnector connector = new SelectChannelConnector();
@@ -34,22 +47,7 @@ public class MeltiServer {
 		jettyserver.setHandler(context);
 		jettyserver.setStopAtShutdown(true);
 		
-		context.addServlet(new ServletHolder(new BltiServlet()), "/melti/*");
-		//context.addServlet(new ServletHolder(new ServiceServlet()), "/service/*");
-	
-		//the_task = new Task(null, "Enunciado del problema", null);
-		//user = new User[]{ new User("","","","","", "") };
-	}
-	
-	public static MeltiServer get() {
-		if (yo==null) {
-			yo = new MeltiServer();
-		}
-		return yo;
-	}
-	
-	public Server getServer() {
-		return jettyserver;
+		context.addServlet(new ServletHolder(new BltiServlet()), "/melti/*");	
 	}
 	
 	public Hashtable<String, Student> getStudents() {
@@ -70,22 +68,6 @@ public class MeltiServer {
 	
 	public Task getTask(String task_id) {
 		return this.the_tasks.get(task_id);
-	}
-	
-	/*public User[] getUser() {
-		return this.user;
-	}
-
-	public void createUser(String i, String n, String f, String e, String r) {
-		if(user!=null) {
-			user[0].setEmail(e);
-			user[0].setLast_name(f);
-			user[0].setID(i);
-			user[0].setFirst_name(n);
-			user[0].setRole(r);
-		}
-	}*/
-	
-	
+	}	
 	
 }

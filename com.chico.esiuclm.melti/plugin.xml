@@ -160,7 +160,7 @@
       </view>
       <view
             category="com.chico.esiuclm.melti"
-            class="com.chico.esiuclm.melti.gui.views.UserView"
+            class="com.chico.esiuclm.melti.gui.views.ProfesorView"
             icon="icons/user.png"
             id="com.chico.esiuclm.melti.views.userView"
             name="Usuario"
