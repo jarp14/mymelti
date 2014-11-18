@@ -4,12 +4,10 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-import com.chico.esiuclm.melti.MeltiPlugin;
-import com.chico.esiuclm.melti.model.MeltiServer;
+import com.chico.esiuclm.melti.net.Proxy;
 
 public class StopServer extends AbstractHandler {
 	
@@ -20,9 +18,9 @@ public class StopServer extends AbstractHandler {
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
 		
-		if(MeltiServer.get().getJettyServer().getState().equals("STARTED")) {
+		if(Proxy.get().getJettyServer().getState().equals("STARTED")) {
 			try {
-				MeltiServer.get().getJettyServer().stop();
+				Proxy.get().getJettyServer().stop();
 				MessageDialog.openInformation(window.getShell(), "Melti",
 						"Escucha pausada con éxito");
 			} catch (Exception e) {

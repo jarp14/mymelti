@@ -12,7 +12,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.part.ViewPart;
 
-import com.chico.esiuclm.melti.model.MeltiServer;
 import com.chico.esiuclm.melti.model.Student;
 
 public class ProfesorView extends ViewPart {
@@ -90,7 +89,7 @@ public class ProfesorView extends ViewPart {
 		
 		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setContentProvider(new ViewContentProvider());		
-		viewer.setInput(MeltiServer.get().getStudent("0"));
+		//viewer.setInput(Proxy.get().getStudent("0"));
 		//viewer.setInput(MeltiServer.get().getUser());
 		
 	}

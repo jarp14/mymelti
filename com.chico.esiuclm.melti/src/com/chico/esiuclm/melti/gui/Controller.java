@@ -14,8 +14,8 @@ public class Controller {
 	
 	public Controller() { // Valores iniciales
 		active_task = new Task(-99999, "Enunciado del problema a resolver", " ");
-		active_student = new Student(-99999,"","","", "", null);
-		active_profesor = new Profesor(-99999,"","","","", null);
+		active_student = new Student(-99999,"","","", "");
+		active_profesor = new Profesor(-99999,"","","","", "");
 	}
 	
 	public static Controller get() {
