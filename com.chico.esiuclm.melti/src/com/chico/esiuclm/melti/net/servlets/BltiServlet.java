@@ -57,11 +57,11 @@ public class BltiServlet extends HttpServlet {
 		String course_label = request.getParameter("context_label"); // Etiqueta del curso
 		
 		// Informacion para posible retorno y calificaciones
-		String service_url = request.getParameter("lis_outcome_service_url"); // Direccion de retorno
-		String sourceid = request.getParameter("lis_result_sourceid"); // Datos para retorno
+		//String service_url = request.getParameter("lis_outcome_service_url"); // Direccion de retorno
+		//String sourceid = request.getParameter("lis_result_sourceid"); // Datos para retorno
 		
 		/** 
-		 * Comprobaciones de las claves secretas e identidad del usuario entre sistemas
+		 * Comprobaciones de seguridad entre sistemas
 		 */
 		// Validacion de credenciales (Key+Secret)
 		try {
@@ -102,30 +102,24 @@ public class BltiServlet extends HttpServlet {
 		
 		/**
 		 * Generacion de objetos para su manipulacion en la sesion
-		 */		
-		// Creamos proyecto Java
-		try {
-			Proxy.get().createProject(task_title, user_id, task_id, task_code, Proxy.get().checkFileName(task_class_name));
-		} catch (Exception e) {
-			e.printStackTrace();
+		 */
+		if (user_role.equals("Instructor")) { // Si el cliente es un Profesor
+			Proxy.get().addProfesorToDB(user_id, user_firstName, user_lastName, user_email, user_role);
+		} 
+		else if (user_role.equals("Learner")) { // Si el cliente es un Estudiante
+			// Lo anadimos a la BD si no esta todavia
+			Proxy.get().addStudentToDB(user_id, user_firstName, user_lastName, user_email, user_role);
+			// Creamos proyecto Java
+			try {
+				Proxy.get().createProject(task_title, user_id, task_id, task_code, Proxy.get().checkFileName(task_class_name));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			// Actualizamos las vistas
+			Controller.get().updateTaskForView(task_id, task_statement, task_code); // Envia la llamada para actualizar la vista enunciado
 		}
 		
-		// Instanciamos los objetos		
-		Task active_task = new Task(Integer.parseInt(task_id), task_statement, task_code);
-		Course active_course = new Course(Integer.parseInt(course_id), course_title, course_label);
-		if (user_role.equals("Instructor")) {
-			Profesor active_profesor = new Profesor(Integer.parseInt(user_id), user_firstName, user_lastName, user_email, user_role, task_code);
-		} else if (user_role.equals("Learner")) {
-			Student active_student = new Student(Integer.parseInt(user_id), user_firstName, user_lastName, user_email, user_role);
-		}
-		
-		// Actualizamos las vistas
-		Controller.get().updateTaskForView(active_task); // Envia la llamada para actualizar la vista enunciado
-		/*try {
-			active_student.add();
-		} catch (ClassNotFoundException | SQLException | GenericErrorException e1) {
-			e1.printStackTrace();
-		}*/
+		Proxy.get().addCourseToDB(course_id, course_title, course_label);
 	}
 	
 	public void doError(HttpServletRequest request, HttpServletResponse response, int errorkey) throws IOException {

@@ -3,6 +3,7 @@ package com.chico.esiuclm.melti.net;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,7 +36,10 @@ import com.chico.esiuclm.melti.exceptions.NotCodeException;
 import com.chico.esiuclm.melti.exceptions.NotProfesorException;
 import com.chico.esiuclm.melti.exceptions.NotStatementException;
 import com.chico.esiuclm.melti.exceptions.NotStudentException;
+import com.chico.esiuclm.melti.model.Course;
 import com.chico.esiuclm.melti.model.MeltiServer;
+import com.chico.esiuclm.melti.model.Profesor;
+import com.chico.esiuclm.melti.model.Student;
 import com.chico.esiuclm.melti.net.oauth.OAuthAccessor;
 import com.chico.esiuclm.melti.net.oauth.OAuthConsumer;
 import com.chico.esiuclm.melti.net.oauth.OAuthException;
@@ -59,6 +63,7 @@ public class Proxy {
 	
 	public Proxy() {
 		initJettyServer();
+		this.server = MeltiServer.get();
 	}
 	
 	// Singleton
@@ -90,6 +95,38 @@ public class Proxy {
 		jettyserver.setStopAtShutdown(true);
 		
 		context.addServlet(new ServletHolder(new BltiServlet()), "/melti/*");	
+	}
+	
+	// Agregar un estudiante a la BBDD
+	public void addStudentToDB(String id, String first, String last, String email, String role) {
+		Student student = new Student(id, first, last, email, role);
+		try {
+			this.server.addStudent(student);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (GenericErrorException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void addProfesorToDB(String id, String first, String last, String email, String role) {
+		Profesor profesor = new Profesor(id, first, last, email, role, null);
+		try {
+			this.server.addProfesor(profesor);
+		} catch (ClassNotFoundException | SQLException | GenericErrorException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void addCourseToDB(String id, String title, String label) {
+		Course course = new Course(id, title, label);
+		try {
+			this.server.addCourse(course);
+		} catch (ClassNotFoundException | SQLException | GenericErrorException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	

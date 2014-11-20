@@ -3,11 +3,11 @@ package com.chico.esiuclm.melti.model;
 
 public abstract class User extends ModelObject {
 
-	protected int id;
+	protected String id;
 	protected String first_name, last_name;
 	protected String email, role;
 	
-	public User(int id, String first, String last, String email, String role) {
+	public User(String id, String first, String last, String email, String role) {
 		this.id = id;
 		this.first_name = first;
 		this.last_name = last;
@@ -15,11 +15,11 @@ public abstract class User extends ModelObject {
 		this.role = role;
 	}
 	
-	public int getID() {
+	public String getID() {
 		return id;
 	}
 	
-	public void setID(int id) {
+	public void setID(String id) {
 		firePropertyChange("user_id", this.id, this.id = id);
 	}
 	
@@ -53,15 +53,6 @@ public abstract class User extends ModelObject {
 
 	public void setRole(String role) {
 		this.role = role;
-	}
-	
-	public String toString() {
-		return this.first_name+" "+this.last_name+" : "+this.email;
-	}
-	
-	public boolean equals (Object o) {
-		return (o instanceof User && 
-				((User)o).email.equals(this.email));
 	}
 	
 }

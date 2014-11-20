@@ -18,7 +18,7 @@ public class Broker {
 		return yo;
 	}
 
-	public Connection getBD() throws SQLException { //Base de datos
+	public Connection getDB() throws SQLException { //Base de datos
 		return DriverManager.getConnection("jdbc:mysql://localhost:3306/melti", "root", "76Ar36Yo");
 	}
 }

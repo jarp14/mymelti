@@ -13,9 +13,9 @@ public class Controller {
 	private Course active_course; // Curso activo
 	
 	public Controller() { // Valores iniciales
-		active_task = new Task(-99999, "Enunciado del problema a resolver", " ");
-		active_student = new Student(-99999,"","","", "");
-		active_profesor = new Profesor(-99999,"","","","", "");
+		active_task = new Task("-9999", "Enunciado del problema a resolver", " ");
+		active_student = new Student("-9999","","","", "");
+		active_profesor = new Profesor("-9999","","","","", "");
 	}
 	
 	public static Controller get() {
@@ -41,10 +41,10 @@ public class Controller {
 		return this.active_course;
 	}
 	
-	public void updateTaskForView(Task task) { // Envia la llamada a la vista para refrescar
-		this.active_task.setID(task.getID());
-		this.active_task.setStatement(task.getStatement());
-		this.active_task.setCode(task.getCode());
+	public void updateTaskForView(String task_id, String task_statement, String task_code) { // Envia la llamada a la vista para refrescar
+		this.active_task.setID(task_id);
+		this.active_task.setStatement(task_statement);
+		this.active_task.setCode(task_code);
 	}
 	
 }

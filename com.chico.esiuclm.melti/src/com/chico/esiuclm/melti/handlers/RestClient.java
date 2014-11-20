@@ -27,8 +27,6 @@ public class RestClient extends AbstractHandler {
 		
 		//MeltiFileDialog dialog = new MeltiFileDialog(Display.getCurrent());
 		//String filePath = dialog.getFileLocation();
-		
-        //String token = "326f339ade9abdfb26d79443b7404a55";
         String token = "939fd7e6723c4622cfc2a169536227dc";
 		String domainName = "http://localhost";
 		        

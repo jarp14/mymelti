@@ -58,7 +58,7 @@
             commandId="com.chico.esiuclm.melti.commands.stopServer">
       </handler>
       <handler
-            class="com.chico.esiuclm.melti.handlers.RestClient"
+            class="com.chico.esiuclm.melti.handlers.UploadGradeRest"
             commandId="com.chico.esiuclm.melti.commands.restClient">
       </handler>
    </extension>
