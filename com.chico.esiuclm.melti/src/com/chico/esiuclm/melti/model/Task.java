@@ -2,18 +2,23 @@ package com.chico.esiuclm.melti.model;
 
 import java.sql.SQLException;
 
-import com.chico.esiuclm.melti.exceptions.GenericErrorException;
 import com.chico.esiuclm.melti.persistence.DAOTask;
 
 public class Task extends ModelObject {
 	
 	private String id; 
 	private String statement, code;
+	private String courseID;
 	
-	public Task(String id, String st, String co) {
-		this. id = id;
+	public Task(String st) {
+		this.statement = st;
+	}
+	
+	public Task(String id, String st, String co, String cId) {
+		this.id = id;
 		this.statement = st;
 		this.code = co;
+		this.courseID = cId;
 	}
 	
 	public String getID() {
@@ -40,8 +45,14 @@ public class Task extends ModelObject {
 		this.code = code;
 	}
 	
-	public void add() throws ClassNotFoundException, SQLException, GenericErrorException {
+	public String getCourseID() {
+		return this.courseID;
+	}
+	
+	public void add() throws ClassNotFoundException, SQLException {
 		DAOTask.addTaskDB(this);
 	}
+
+	
 	
 }

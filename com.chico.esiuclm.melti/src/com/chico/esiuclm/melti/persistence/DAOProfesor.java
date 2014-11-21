@@ -20,4 +20,8 @@ public class DAOProfesor {
 		cs.executeUpdate();
 		db.close();
 	}
+	
+	public static void removeProfesorDB(Profesor the_profesor) {
+		
+	}
 }

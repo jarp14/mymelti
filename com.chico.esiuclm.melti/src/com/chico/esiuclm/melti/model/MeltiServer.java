@@ -8,10 +8,11 @@ import com.chico.esiuclm.melti.exceptions.GenericErrorException;
 public class MeltiServer {
 	
 	private static MeltiServer yo;
-	private Hashtable<String, Course> the_courses; // Cursos
+	private Student the_student;
+	private Profesor the_profesor;
+	private Task the_task;
+	private Course the_course;
 	private Hashtable<String, User> the_users; // Usuarios
-	private Hashtable<String, Task> the_tasks; // Tareas
-	private Hashtable<String, Solution> the_solutions; // Soluciones de los alumnos
 	
 	private MeltiServer() {}
 	
@@ -22,40 +23,12 @@ public class MeltiServer {
 		return yo;
 	}
 	
-	public Hashtable<String, User> getUsers() {
-		return the_users;
-	}
-	
-	public Student getStudent(String user_id) {
-		return (Student) this.the_users.get(user_id);
-	}
-	
-	public Profesor getProfesor(String user_id) {
-		return (Profesor) this.the_users.get(user_id);
-	}
-	
-	public Task getTask(String task_id) {
-		return this.the_tasks.get(task_id);
-	}
-	
-	public Course getCourse(String course_id) {
-		return this.the_courses.get(course_id);
-	}
-	
 	public void addCourse(Course course) throws ClassNotFoundException, SQLException, GenericErrorException {
-		if (the_courses==null) {
-			this.the_courses = new Hashtable<String, Course>();
-		}
-		course.add();
-		this.the_courses.put(course.getID(), course);	
+		course.add(); // Agrega el curso a la BBDD	
 	}
 	
 	public void addTask(Task task) throws ClassNotFoundException, SQLException, GenericErrorException {
-		if (the_tasks==null) {
-			this.the_tasks = new Hashtable<String, Task>();
-		}
-		task.add();
-		this.the_tasks.put(task.getID(), task);
+		task.add(); // Agrega la tarea a la BBDD
 	}
 	
 	public void addStudent(Student student) throws ClassNotFoundException, SQLException, GenericErrorException {
@@ -65,13 +38,39 @@ public class MeltiServer {
 		student.add();
 		this.the_users.put(student.getID(), student);
 	}
+	
+	/**
+	 * Getters y Setters
+	 */
+	public void setActiveCourse(Course course) {
+		this.the_course = course;		
+	}
 
-	public void addProfesor(Profesor profesor) throws ClassNotFoundException, SQLException, GenericErrorException {
-		if (the_users==null) {
-			this.the_users = new Hashtable<String, User>();
-		}
-		profesor.add();
-		this.the_users.put(profesor.getID(), profesor);	
+	public void setActiveTask(Task task) {
+		this.the_task = task;	
+	}
+	
+	public Student getActiveStudent() {
+		return this.the_student;
+	}
+	public void setActiveStudent(Student student) {
+		this.the_student = student;
+	}
+	
+	public Profesor getActiveProfesor() {
+		return this.the_profesor;
+	}
+	
+	public void setActiveProfesor(Profesor profesor) {
+		this.the_profesor = profesor;		
+	}
+	
+	public Hashtable<String, User> getUsers() {
+		return the_users;
+	}
+	
+	public Student getStudent(String user_id) {
+		return (Student) this.the_users.get(user_id);
 	}
 	
 }

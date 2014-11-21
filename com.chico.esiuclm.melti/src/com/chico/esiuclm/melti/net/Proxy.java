@@ -40,6 +40,7 @@ import com.chico.esiuclm.melti.model.Course;
 import com.chico.esiuclm.melti.model.MeltiServer;
 import com.chico.esiuclm.melti.model.Profesor;
 import com.chico.esiuclm.melti.model.Student;
+import com.chico.esiuclm.melti.model.Task;
 import com.chico.esiuclm.melti.net.oauth.OAuthAccessor;
 import com.chico.esiuclm.melti.net.oauth.OAuthConsumer;
 import com.chico.esiuclm.melti.net.oauth.OAuthException;
@@ -74,6 +75,9 @@ public class Proxy {
 		return yo;
 	}
 	
+	/**
+	 * Metodos del contenedor de servlets Jetty
+	 */
 	// Obtiene el contenedor de servlets
 	public Server getJettyServer() {
 		return jettyserver;
@@ -97,11 +101,15 @@ public class Proxy {
 		context.addServlet(new ServletHolder(new BltiServlet()), "/melti/*");	
 	}
 	
+	/**
+	 * Trabajando con la BBDD y generacion de objetos en el sistema
+	 */
 	// Agregar un estudiante a la BBDD
 	public void addStudentToDB(String id, String first, String last, String email, String role) {
 		Student student = new Student(id, first, last, email, role);
 		try {
 			this.server.addStudent(student);
+			this.server.setActiveStudent(student); // Valores del estudiante activo
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} catch (SQLException e) {
@@ -111,25 +119,38 @@ public class Proxy {
 		}
 	}
 	
-	public void addProfesorToDB(String id, String first, String last, String email, String role) {
-		Profesor profesor = new Profesor(id, first, last, email, role, null);
+	// Agregar una tarea
+	public void addTaskToDB(String id, String statement, String code, String courseId) {
+		Task task = new Task(id, statement, code, courseId);
 		try {
-			this.server.addProfesor(profesor);
+			this.server.addTask(task);
+			this.server.setActiveTask(task); // Valores de la tarea activa
 		} catch (ClassNotFoundException | SQLException | GenericErrorException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	// Agregar un curso
 	public void addCourseToDB(String id, String title, String label) {
 		Course course = new Course(id, title, label);
 		try {
 			this.server.addCourse(course);
+			this.server.setActiveCourse(course); // Valores del curso activo
 		} catch (ClassNotFoundException | SQLException | GenericErrorException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	// Guardamos el profesor usando el sistema
+	public void setActiveProfesor(String id, String first, String last, String email, String role) {
+		Profesor profesor = new Profesor(id, first, last, email, role, null);
+		this.server.setActiveProfesor(profesor); // Valores del profesor activo
+	}
 	
+	/**
+	 * Metodos para asegurar la identidad del usuario
+	 * asi como la recepcion y correcta creacion de una tarea
+	 */
 	// Metodo para capturar y limpiar el enunciado enviado desde Moodle
 	public String acquireStatement(String st_code) throws NotStatementException {
 		String statement;
@@ -220,15 +241,9 @@ public class Proxy {
 	    }
 	}
 	
-	// Comprobaciones relacionadas con las credenciales del usuario
-	public void checkUser(String email, String role) throws NotProfesorException, NotStudentException, GenericErrorException {
-		String eclipse_userID = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_id"); // ID de las preferencias en Eclipse
+	// Comprobaciones relacionadas con las credenciales del usuario y las preferencias en Eclipse
+	public void checkUser(String role) throws NotProfesorException, NotStudentException, GenericErrorException {
 		String eclipse_userRole = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_role"); // Rol de las preferencias en Eclipse
-	
-		if (!email.equals(eclipse_userID)) { // No coinciden el usuario de Moodle y Eclipse
-			throw new GenericErrorException();
-		}
-		
 		if (role.equals("Instructor")) {
 			if (!eclipse_userRole.equals("melti_rprofesor"))  // No tiene los privilegios de profesor
 				throw new NotProfesorException();
@@ -239,21 +254,8 @@ public class Proxy {
 			throw new GenericErrorException();
 		}
 	}
-	
-	// Informamos de que las comprobaciones fueron exitosas
-	public void sayOK(HttpServletResponse response) throws IOException {
-		response.setContentType("text/html");
-		PrintWriter out = response.getWriter();
-		out.println("<html>");
-		out.println("<body>");
-		out.println("<center>");
-		out.println("<h1>Validación de credenciales correcta</h1>\n");
-		out.println("<h3>:)</h3>\n");
-		out.println("</center>");
-		out.println("</body>");
-		out.println("</html>");
-	}
 
+	// Comprobacion de las credenciales usando OAuth
 	public void checkOauthCredentials(HttpServletRequest request) throws OAuthException, IOException, URISyntaxException {
 		String eclipse_user_key = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_key"); // Valor obtenido de las preferencias
 		String eclipse_user_secret = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_secret"); // Valor obtenido de las preferencias
@@ -264,5 +266,19 @@ public class Proxy {
 		
 		oav.validateMessage(oam, acc); // Validacion de credenciales
 	}
+	
+	// Informamos de que las comprobaciones fueron exitosas
+		public void sayOK(HttpServletResponse response) throws IOException {
+			response.setContentType("text/html");
+			PrintWriter out = response.getWriter();
+			out.println("<html>");
+			out.println("<body>");
+			out.println("<center>");
+			out.println("<h1>Validación de credenciales correcta</h1>\n");
+			out.println("<h3>:)</h3>\n");
+			out.println("</center>");
+			out.println("</body>");
+			out.println("</html>");
+		}
 	
 }

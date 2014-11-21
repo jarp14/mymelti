@@ -31,8 +31,8 @@ public class MeltiPreferencePage extends FieldEditorPreferencePage
 	implements IWorkbenchPreferencePage {
 	
 	private RadioGroupFieldEditor rolePrefEditor;
-	private StringFieldEditor idPrefEditor, tokenPrefEditor, 
-									keyPrefEditor, secretPrefEditor;	
+	private StringFieldEditor tokenPrefEditor, 
+								keyPrefEditor, secretPrefEditor;	
 	
 	public MeltiPreferencePage() {
 		super(GRID);
@@ -54,12 +54,10 @@ public class MeltiPreferencePage extends FieldEditorPreferencePage
 						{ "Alumno", IPreferenceConstants.MELTI_ROLE_STUDENT }, 
 						{ "Profesor", IPreferenceConstants.MELTI_ROLE_PROFESOR } }, 
 				getFieldEditorParent());
-		idPrefEditor = new StringFieldEditor(IPreferenceConstants.MELTI_USERID, "ID Usuario", getFieldEditorParent());
 		keyPrefEditor = new StringFieldEditor(IPreferenceConstants.MELTI_KEY, "Key", getFieldEditorParent());
 		secretPrefEditor = new StringFieldEditor(IPreferenceConstants.MELTI_SECRET, "Secret", getFieldEditorParent());
 		tokenPrefEditor = new StringFieldEditor(IPreferenceConstants.MELTI_TOKEN, "Token", getFieldEditorParent());
 		addField(rolePrefEditor);
-		addField(idPrefEditor);
 		addField(keyPrefEditor);
 		addField(secretPrefEditor);
 		addField(tokenPrefEditor);
@@ -76,12 +74,10 @@ public class MeltiPreferencePage extends FieldEditorPreferencePage
 	public void propertyChange(PropertyChangeEvent event) {
 		super.propertyChange(event);
 	    if (event.getProperty().equals(FieldEditor.VALUE)) {
-	    	if (event.getSource() == idPrefEditor) {
+	    	 if (event.getSource() == keyPrefEditor) {
 	    		checkState(0);
-	    	} else if (event.getSource() == keyPrefEditor) {
-	    		checkState(1);
 	    	} else if (event.getSource() == secretPrefEditor) {
-	    		checkState(2);
+	    		checkState(1);
 	    	}
 	    }
 	}
@@ -92,20 +88,6 @@ public class MeltiPreferencePage extends FieldEditorPreferencePage
 		
 		switch(editor) {
 			case 0:
-				if (idPrefEditor.getStringValue()!=null && !idPrefEditor.getStringValue().equals("")) {
-					if(validateEmail(idPrefEditor.getStringValue())) {
-						setErrorMessage(null);
-						setValid(true);
-					} else {
-						setErrorMessage("Aviso: ID usuario no es un email válido");
-						setValid(false);
-					}
-				} else {
-					setErrorMessage("Aviso: ID usuario no puede estar vacío");
-					setValid(false);
-				}
-				break;
-			case 1:
 				if (keyPrefEditor.getStringValue()!=null && !keyPrefEditor.getStringValue().equals("")) {
 					setErrorMessage(null);
 					setValid(true);
@@ -114,7 +96,7 @@ public class MeltiPreferencePage extends FieldEditorPreferencePage
 					setValid(false);
 				}
 				break;
-			case 2:
+			case 1:
 				if (secretPrefEditor.getStringValue()!=null && !secretPrefEditor.getStringValue().equals("")) {
 					setErrorMessage(null);
 					setValid(true);

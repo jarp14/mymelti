@@ -16,10 +16,6 @@ import com.chico.esiuclm.melti.exceptions.NotProfesorException;
 import com.chico.esiuclm.melti.exceptions.NotStatementException;
 import com.chico.esiuclm.melti.exceptions.NotStudentException;
 import com.chico.esiuclm.melti.gui.Controller;
-import com.chico.esiuclm.melti.model.Course;
-import com.chico.esiuclm.melti.model.Profesor;
-import com.chico.esiuclm.melti.model.Student;
-import com.chico.esiuclm.melti.model.Task;
 import com.chico.esiuclm.melti.net.Proxy;
 import com.chico.esiuclm.melti.net.oauth.OAuthException;
 
@@ -66,17 +62,10 @@ public class BltiServlet extends HttpServlet {
 		// Validacion de credenciales (Key+Secret)
 		try {
 			Proxy.get().checkOauthCredentials(request);
-		} catch (OAuthException | URISyntaxException e1) {
+			Proxy.get().checkUser(user_role);
+		} catch (OAuthException | URISyntaxException | 
+				NotProfesorException | NotStudentException | GenericErrorException e1) {
 			e1.printStackTrace();
-			doError(request, response, 0);
-			return;
-		}
-
-		// Identidad del usuario
-		try {
-			Proxy.get().checkUser(user_email, user_role);
-		} catch (NotProfesorException | NotStudentException | GenericErrorException e2) {
-			e2.printStackTrace();
 			doError(request, response, 0);
 			return;
 		}
@@ -104,22 +93,23 @@ public class BltiServlet extends HttpServlet {
 		 * Generacion de objetos para su manipulacion en la sesion
 		 */
 		if (user_role.equals("Instructor")) { // Si el cliente es un Profesor
-			Proxy.get().addProfesorToDB(user_id, user_firstName, user_lastName, user_email, user_role);
+			Proxy.get().setActiveProfesor(user_id, user_firstName, user_lastName, user_email, user_role);
 		} 
 		else if (user_role.equals("Learner")) { // Si el cliente es un Estudiante
 			// Lo anadimos a la BD si no esta todavia
 			Proxy.get().addStudentToDB(user_id, user_firstName, user_lastName, user_email, user_role);
-			// Creamos proyecto Java
-			try {
+			try { // Creamos proyecto Java
 				Proxy.get().createProject(task_title, user_id, task_id, task_code, Proxy.get().checkFileName(task_class_name));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			// Actualizamos las vistas
-			Controller.get().updateTaskForView(task_id, task_statement, task_code); // Envia la llamada para actualizar la vista enunciado
+			Controller.get().updateTaskForView(task_statement); // Envia la llamada para actualizar la vista enunciado
 		}
 		
-		Proxy.get().addCourseToDB(course_id, course_title, course_label);
+		// En ambos casos
+		Proxy.get().addCourseToDB(course_id, course_title, course_label); // Agregamos curso si aun no esta
+		Proxy.get().addTaskToDB(task_id, task_statement, task_code, course_id);
 	}
 	
 	public void doError(HttpServletRequest request, HttpServletResponse response, int errorkey) throws IOException {

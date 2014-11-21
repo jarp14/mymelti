@@ -20,4 +20,8 @@ public class DAOCourse {
 		db.close();
 	}
 	
+	public static void removeCourseDB(Course the_course) {
+		
+	}
+	
 }
