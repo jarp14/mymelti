@@ -12,11 +12,12 @@ public class DAOStudent {
 	public static void addStudentDB(Student the_student) throws ClassNotFoundException, SQLException {
 		Broker broker = Broker.get();
 		Connection db = broker.getDB();
-		CallableStatement cs = db.prepareCall("{call addStudent(?,?,?,?)}");
+		CallableStatement cs = db.prepareCall("{call addStudent(?,?,?,?,?)}");
 		cs.setString(1, the_student.getID());
 		cs.setString(2, the_student.getFirst_name());
 		cs.setString(3, the_student.getLast_name());
 		cs.setString(4, the_student.getEmail());
+		cs.setString(5, the_student.getCourseID());
 		cs.executeUpdate();
 		db.close();
 	}

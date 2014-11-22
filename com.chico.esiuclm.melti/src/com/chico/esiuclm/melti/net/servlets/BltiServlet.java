@@ -62,7 +62,7 @@ public class BltiServlet extends HttpServlet {
 		// Validacion de credenciales (Key+Secret)
 		try {
 			Proxy.get().checkOauthCredentials(request);
-			Proxy.get().checkUser(user_role);
+			Proxy.get().checkUser(user_email, user_role);
 		} catch (OAuthException | URISyntaxException | 
 				NotProfesorException | NotStudentException | GenericErrorException e1) {
 			e1.printStackTrace();
@@ -92,12 +92,17 @@ public class BltiServlet extends HttpServlet {
 		/**
 		 * Generacion de objetos para su manipulacion en la sesion
 		 */
+		
+		// En ambos casos
+		Proxy.get().addCourseToDB(course_id, course_title, course_label); // Agregamos curso si aun no esta
+		Proxy.get().addTaskToDB(task_id, task_statement, task_code, course_id);
+		
 		if (user_role.equals("Instructor")) { // Si el cliente es un Profesor
-			Proxy.get().setActiveProfesor(user_id, user_firstName, user_lastName, user_email, user_role);
+			Proxy.get().setActiveProfesor(user_id, user_firstName, user_lastName, user_email, user_role, course_id);
 		} 
 		else if (user_role.equals("Learner")) { // Si el cliente es un Estudiante
 			// Lo anadimos a la BD si no esta todavia
-			Proxy.get().addStudentToDB(user_id, user_firstName, user_lastName, user_email, user_role);
+			Proxy.get().addStudentToDB(user_id, user_firstName, user_lastName, user_email, user_role, course_id);
 			try { // Creamos proyecto Java
 				Proxy.get().createProject(task_title, user_id, task_id, task_code, Proxy.get().checkFileName(task_class_name));
 			} catch (Exception e) {
@@ -106,10 +111,6 @@ public class BltiServlet extends HttpServlet {
 			// Actualizamos las vistas
 			Controller.get().updateTaskForView(task_statement); // Envia la llamada para actualizar la vista enunciado
 		}
-		
-		// En ambos casos
-		Proxy.get().addCourseToDB(course_id, course_title, course_label); // Agregamos curso si aun no esta
-		Proxy.get().addTaskToDB(task_id, task_statement, task_code, course_id);
 	}
 	
 	public void doError(HttpServletRequest request, HttpServletResponse response, int errorkey) throws IOException {

@@ -6,13 +6,15 @@ public abstract class User extends ModelObject {
 	protected String id;
 	protected String first_name, last_name;
 	protected String email, role;
+	private String course_id;
 	
-	public User(String id, String first, String last, String email, String role) {
+	public User(String id, String first, String last, String email, String role, String courseId) {
 		this.id = id;
 		this.first_name = first;
 		this.last_name = last;
 		this.email = email;
 		this.role = role;
+		this.course_id = courseId;
 	}
 	
 	public String getID() {
@@ -53,6 +55,10 @@ public abstract class User extends ModelObject {
 
 	public void setRole(String role) {
 		this.role = role;
+	}
+	
+	public String getCourseID() {
+		return this.course_id;
 	}
 	
 }

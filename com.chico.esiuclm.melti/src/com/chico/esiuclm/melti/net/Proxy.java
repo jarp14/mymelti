@@ -105,8 +105,8 @@ public class Proxy {
 	 * Trabajando con la BBDD y generacion de objetos en el sistema
 	 */
 	// Agregar un estudiante a la BBDD
-	public void addStudentToDB(String id, String first, String last, String email, String role) {
-		Student student = new Student(id, first, last, email, role);
+	public void addStudentToDB(String id, String first, String last, String email, String role, String courseId) {
+		Student student = new Student(id, first, last, email, role, courseId);
 		try {
 			this.server.addStudent(student);
 			this.server.setActiveStudent(student); // Valores del estudiante activo
@@ -142,8 +142,8 @@ public class Proxy {
 	}
 	
 	// Guardamos el profesor usando el sistema
-	public void setActiveProfesor(String id, String first, String last, String email, String role) {
-		Profesor profesor = new Profesor(id, first, last, email, role, null);
+	public void setActiveProfesor(String id, String first, String last, String email, String role, String courseId) {
+		Profesor profesor = new Profesor(id, first, last, email, role, null, courseId);
 		this.server.setActiveProfesor(profesor); // Valores del profesor activo
 	}
 	
@@ -242,18 +242,24 @@ public class Proxy {
 	}
 	
 	// Comprobaciones relacionadas con las credenciales del usuario y las preferencias en Eclipse
-	public void checkUser(String role) throws NotProfesorException, NotStudentException, GenericErrorException {
-		String eclipse_userRole = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_role"); // Rol de las preferencias en Eclipse
-		if (role.equals("Instructor")) {
-			if (!eclipse_userRole.equals("melti_rprofesor"))  // No tiene los privilegios de profesor
-				throw new NotProfesorException();
-		} else if (role.equals("Learner")) { 
-			if (!eclipse_userRole.equals("melti_rstudent")) // No tiene los privilegios de estudiante
-				throw new NotStudentException();
-		} else {
-			throw new GenericErrorException();
+		public void checkUser(String email, String role) throws NotProfesorException, NotStudentException, GenericErrorException {
+			String eclipse_userID = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_id"); // ID de las preferencias en Eclipse
+			String eclipse_userRole = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_role"); // Rol de las preferencias en Eclipse
+		
+			if (!email.equals(eclipse_userID)) { // No coinciden el usuario de Moodle y Eclipse
+				throw new GenericErrorException();
+			}
+			
+			if (role.equals("Instructor")) {
+				if (!eclipse_userRole.equals("melti_rprofesor"))  // No tiene los privilegios de profesor
+					throw new NotProfesorException();
+			} else if (role.equals("Learner")) { 
+				if (!eclipse_userRole.equals("melti_rstudent")) // No tiene los privilegios de estudiante
+					throw new NotStudentException();
+			} else {
+				throw new GenericErrorException();
+			}
 		}
-	}
 
 	// Comprobacion de las credenciales usando OAuth
 	public void checkOauthCredentials(HttpServletRequest request) throws OAuthException, IOException, URISyntaxException {
