@@ -27,8 +27,12 @@ public class MeltiServer {
 		course.add(); // Agrega el curso a la BBDD	
 	}
 	
-	public void addTask(Task task) throws ClassNotFoundException, SQLException, GenericErrorException {
+	public void addTask(Task task) throws ClassNotFoundException, SQLException {
 		task.add(); // Agrega la tarea a la BBDD
+	}
+	
+	public void addSolution(Solution solution) throws ClassNotFoundException, SQLException {
+		solution.add(); // Agrega la resolucion de una tarea a la BBDD
 	}
 	
 	public void addStudent(Student student) throws ClassNotFoundException, SQLException, GenericErrorException {
@@ -37,6 +41,14 @@ public class MeltiServer {
 		}
 		student.add();
 		this.the_users.put(student.getID(), student);
+	}
+	
+	public Hashtable<String, User> getUsers() {
+		return the_users;
+	}
+	
+	public Student getStudent(String user_id) {
+		return (Student) this.the_users.get(user_id);
 	}
 	
 	/**
@@ -50,27 +62,28 @@ public class MeltiServer {
 		this.the_task = task;	
 	}
 	
-	public Student getActiveStudent() {
-		return this.the_student;
-	}
 	public void setActiveStudent(Student student) {
 		this.the_student = student;
-	}
-	
-	public Profesor getActiveProfesor() {
-		return this.the_profesor;
 	}
 	
 	public void setActiveProfesor(Profesor profesor) {
 		this.the_profesor = profesor;		
 	}
 	
-	public Hashtable<String, User> getUsers() {
-		return the_users;
+	public Student getActiveStudent() {
+		return this.the_student;
 	}
 	
-	public Student getStudent(String user_id) {
-		return (Student) this.the_users.get(user_id);
+	public Task getActiveTask() {
+		return this.the_task;
+	}
+	
+	public Course getActiveCourse() {
+		return this.the_course;
+	}
+	
+	public Profesor getActiveProfesor() {
+		return this.the_profesor;
 	}
 	
 }

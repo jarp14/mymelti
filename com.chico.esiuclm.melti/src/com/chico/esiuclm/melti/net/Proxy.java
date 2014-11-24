@@ -36,9 +36,11 @@ import com.chico.esiuclm.melti.exceptions.NotCodeException;
 import com.chico.esiuclm.melti.exceptions.NotProfesorException;
 import com.chico.esiuclm.melti.exceptions.NotStatementException;
 import com.chico.esiuclm.melti.exceptions.NotStudentException;
+import com.chico.esiuclm.melti.exceptions.UserNotLoggedException;
 import com.chico.esiuclm.melti.model.Course;
 import com.chico.esiuclm.melti.model.MeltiServer;
 import com.chico.esiuclm.melti.model.Profesor;
+import com.chico.esiuclm.melti.model.Solution;
 import com.chico.esiuclm.melti.model.Student;
 import com.chico.esiuclm.melti.model.Task;
 import com.chico.esiuclm.melti.net.oauth.OAuthAccessor;
@@ -120,12 +122,12 @@ public class Proxy {
 	}
 	
 	// Agregar una tarea
-	public void addTaskToDB(String id, String statement, String code, String courseId) {
-		Task task = new Task(id, statement, code, courseId);
+	public void addTaskToDB(String id, String statement, String code, String course_id) {
+		Task task = new Task(id, statement, code, course_id);
 		try {
 			this.server.addTask(task);
 			this.server.setActiveTask(task); // Valores de la tarea activa
-		} catch (ClassNotFoundException | SQLException | GenericErrorException e) {
+		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
 	}
@@ -141,10 +143,61 @@ public class Proxy {
 		}
 	}
 	
+	// Agregar una solucion
+	public void addSolutionToDB(String user_id, String task_id, String course_id, String solved_code) {
+		Solution solution = new Solution(user_id, task_id, course_id, solved_code);
+		try {
+			this.server.addSolution(solution);
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 	// Guardamos el profesor usando el sistema
 	public void setActiveProfesor(String id, String first, String last, String email, String role, String courseId) {
 		Profesor profesor = new Profesor(id, first, last, email, role, null, courseId);
 		this.server.setActiveProfesor(profesor); // Valores del profesor activo
+	}
+	
+	/**
+	 * Comprobaciones de seguridad
+	 */
+	
+	// Comprueba que un estudiante esta correctamente logeado en una sesion
+	private boolean studentIsLogged() throws UserNotLoggedException {
+		boolean isLogged = false;
+		
+		if (MeltiServer.get().getActiveStudent() != null && MeltiServer.get().getActiveTask() != null
+				&& MeltiServer.get().getActiveCourse() != null) {
+			isLogged = true;
+		} else throw new UserNotLoggedException();
+		
+		return isLogged;
+	}
+	
+	// Comprueba que un profesor esta correctamente logeado en una sesion
+	public boolean profesorIsLogged() throws UserNotLoggedException {
+		boolean isLogged = false;
+		
+		if (MeltiServer.get().getActiveProfesor() != null) {
+			isLogged = true;
+		} else throw new UserNotLoggedException();
+		
+		return isLogged;
+	}
+	
+	// Previas comprobaciones se permite rescatar las ids para enviar una solucion
+	public String[] getIDs() throws UserNotLoggedException {
+		String[] ids = new String[3];
+		
+		if (studentIsLogged()) {
+			ids[0] = MeltiServer.get().getActiveStudent().getID();
+			ids[1] = MeltiServer.get().getActiveTask().getID();
+			ids[2] = MeltiServer.get().getActiveCourse().getID();
+		} else throw new UserNotLoggedException(); 
+		
+		return ids;
 	}
 	
 	/**
@@ -242,24 +295,24 @@ public class Proxy {
 	}
 	
 	// Comprobaciones relacionadas con las credenciales del usuario y las preferencias en Eclipse
-		public void checkUser(String email, String role) throws NotProfesorException, NotStudentException, GenericErrorException {
-			String eclipse_userID = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_id"); // ID de las preferencias en Eclipse
-			String eclipse_userRole = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_role"); // Rol de las preferencias en Eclipse
-		
-			if (!email.equals(eclipse_userID)) { // No coinciden el usuario de Moodle y Eclipse
-				throw new GenericErrorException();
-			}
-			
-			if (role.equals("Instructor")) {
-				if (!eclipse_userRole.equals("melti_rprofesor"))  // No tiene los privilegios de profesor
-					throw new NotProfesorException();
-			} else if (role.equals("Learner")) { 
-				if (!eclipse_userRole.equals("melti_rstudent")) // No tiene los privilegios de estudiante
-					throw new NotStudentException();
-			} else {
-				throw new GenericErrorException();
-			}
+	public void checkUser(String email, String role) throws NotProfesorException, NotStudentException, GenericErrorException {
+		String eclipse_userID = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_id"); // ID de las preferencias en Eclipse
+		String eclipse_userRole = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_role"); // Rol de las preferencias en Eclipse
+	
+		if (!email.equals(eclipse_userID)) { // No coinciden el usuario de Moodle y Eclipse
+			throw new GenericErrorException();
 		}
+		
+		if (role.equals("Instructor")) {
+			if (!eclipse_userRole.equals("melti_rprofesor"))  // No tiene los privilegios de profesor
+				throw new NotProfesorException();
+		} else if (role.equals("Learner")) { 
+			if (!eclipse_userRole.equals("melti_rstudent")) // No tiene los privilegios de estudiante
+				throw new NotStudentException();
+		} else {
+			throw new GenericErrorException();
+		}
+	}
 
 	// Comprobacion de las credenciales usando OAuth
 	public void checkOauthCredentials(HttpServletRequest request) throws OAuthException, IOException, URISyntaxException {
@@ -274,17 +327,17 @@ public class Proxy {
 	}
 	
 	// Informamos de que las comprobaciones fueron exitosas
-		public void sayOK(HttpServletResponse response) throws IOException {
-			response.setContentType("text/html");
-			PrintWriter out = response.getWriter();
-			out.println("<html>");
-			out.println("<body>");
-			out.println("<center>");
-			out.println("<h1>Validación de credenciales correcta</h1>\n");
-			out.println("<h3>:)</h3>\n");
-			out.println("</center>");
-			out.println("</body>");
-			out.println("</html>");
-		}
+	public void sayOK(HttpServletResponse response) throws IOException {
+		response.setContentType("text/html");
+		PrintWriter out = response.getWriter();
+		out.println("<html>");
+		out.println("<body>");
+		out.println("<center>");
+		out.println("<h1>Validación de credenciales correcta</h1>\n");
+		out.println("<h3>:)</h3>\n");
+		out.println("</center>");
+		out.println("</body>");
+		out.println("</html>");
+	}
 	
 }
