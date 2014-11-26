@@ -47,9 +47,9 @@ public class UploadSolution extends AbstractHandler {
 		// Muestra un dialogo para subir la tarea
 		fdialog = new FileDialog(window.getShell(), SWT.OPEN);
 		fdialog.setFilterExtensions(new String [] {"*.java"});
-		fdialog.setFilterPath("c:\\temp");
+		fdialog.setFilterPath("c:\\");
 		String file_path = fdialog.open();
-		if (file_path != null) { // Abrio un fichero para subirlo, recoge el codigo
+		if (file_path != null) { // El alumno abrio un fichero para subirlo, recoge el codigo
 			try {
 				String currentLine;
 				br = new BufferedReader(new FileReader(file_path));
@@ -70,7 +70,7 @@ public class UploadSolution extends AbstractHandler {
 			// Pide autorizar la subida de la tarea seleccionada al usuario
 			boolean result = MessageDialog.openConfirm(window.getShell(), "Confirmación de envío", 
 					"Tarea a enviar: "+file_path+"\n\n"
-					+ "¿Estás seguro de enviar esta tarea? No podrás modificar esta acción.");
+					+"¿Estás seguro de enviar esta tarea? No podrás modificar esta acción.");
 			if (result) { // OK
 				Proxy.get().addSolutionToDB(ids[0], ids[1], ids[2], code);
 				dialog = new MessageBox(window.getShell(), SWT.ICON_INFORMATION);
@@ -80,8 +80,6 @@ public class UploadSolution extends AbstractHandler {
 			
 		}
 		
-		//System.out.println(file_path);
-		//System.out.println(code);
 		return null;
 	}
 	

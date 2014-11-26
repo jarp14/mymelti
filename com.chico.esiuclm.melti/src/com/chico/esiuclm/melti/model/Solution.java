@@ -15,8 +15,17 @@ public class Solution {
 		this.task_id = tid;
 		this.course_id = cid;
 		this.solved_code = scode;
-		this.calification_grade = -999;
+		this.calification_grade = 0.0;
 		this.calification_comment = "";
+	}
+	
+	public Solution(String uid, String tid, String cid, String scode, double cg, String cc) {
+		this.user_id = uid;
+		this.task_id = tid;
+		this.course_id = cid;
+		this.solved_code = scode;
+		this.calification_grade = cg;
+		this.calification_comment = cc;
 	}
 
 	public String getStudentID() {

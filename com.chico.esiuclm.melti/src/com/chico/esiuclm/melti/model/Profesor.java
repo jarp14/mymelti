@@ -1,12 +1,15 @@
 package com.chico.esiuclm.melti.model;
 
+import java.sql.SQLException;
+
+import com.chico.esiuclm.melti.persistence.DAOProfesor;
+
 public class Profesor extends User {
 	
 	private String token;
 	
-	public Profesor(String id, String first, String last, String email, String role, String token, String courseId) {
-		super(id, first, last, email, role, courseId);
-		this.token = token;
+	public Profesor(String id, String first, String last, String email, String courseId) {
+		super(id, first, last, email, "Instructor", courseId);
 	}
 
 	public String getToken() {
@@ -15,6 +18,14 @@ public class Profesor extends User {
 
 	public void setToken(String token) {
 		this.token = token;
+	}
+
+	public void getSolutions(String task_id, String course_id) throws ClassNotFoundException, SQLException {
+		DAOProfesor.getSolutionsDB(task_id, course_id);
+	}
+
+	public void getStudents(String course_id) throws ClassNotFoundException, SQLException {
+		DAOProfesor.getStudentsDB(course_id);
 	}
 	
 }

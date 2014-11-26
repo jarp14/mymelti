@@ -166,6 +166,14 @@
             name="Usuario"
             restorable="true">
       </view>
+      <view
+            category="com.chico.esiuclm.melti"
+            class="com.chico.esiuclm.melti.gui.views.SolutionsView"
+            icon="icons/sample.gif"
+            id="com.chico.esiuclm.melti.views.solutionsView"
+            name="Monitor"
+            restorable="true">
+      </view>
    </extension>
    
 

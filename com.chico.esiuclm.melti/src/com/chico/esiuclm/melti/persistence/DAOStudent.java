@@ -30,7 +30,7 @@ public class DAOStudent {
 		cs.setString(2, solution.getTaskID());
 		cs.setString(3, solution.getCourseID());
 		cs.setString(4, solution.getSvdCode());
-		cs.setInt(5, -999);
+		cs.setDouble(5, 0.0);
 		cs.setString(6, "");
 		cs.executeUpdate();
 		db.close();

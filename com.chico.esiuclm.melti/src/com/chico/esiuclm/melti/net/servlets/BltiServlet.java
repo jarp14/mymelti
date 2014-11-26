@@ -58,11 +58,11 @@ public class BltiServlet extends HttpServlet {
 		
 		/** 
 		 * Comprobaciones de seguridad entre sistemas
-		 */
+		 */		
 		// Validacion de credenciales (Key+Secret)
 		try {
-			Proxy.get().checkOauthCredentials(request);
-			Proxy.get().checkUser(user_email, user_role);
+			Proxy.get().checkOauthCredentials(request); // Comprueba las claves mediante OAuth
+			Proxy.get().checkUser(user_email, user_role); // Comprueba credenciales del usuario y las preferencias en Eclipse
 		} catch (OAuthException | URISyntaxException | 
 				NotProfesorException | NotStudentException | GenericErrorException e1) {
 			e1.printStackTrace();
@@ -74,8 +74,8 @@ public class BltiServlet extends HttpServlet {
 		String task_statement;
 		String task_code;
 		try {
-			task_statement = Proxy.get().acquireStatement(task_statement_code);
-			task_code = Proxy.get().acquireCode(task_statement_code);
+			task_statement = Proxy.get().acquireStatement(task_statement_code); // Adquiere el enunciado (no puede ser nulo) de la tarea
+			task_code = Proxy.get().acquireCode(task_statement_code); // Adquiere el codigo de la tarea (puede serlo aunque avisa en caso de error)
 		} catch (NotStatementException e3) {
 			e3.printStackTrace();
 			doError(request, response, 1);
@@ -90,27 +90,27 @@ public class BltiServlet extends HttpServlet {
 		Proxy.get().sayOK(response);
 		
 		/**
+		 * Tras las comprobaciones exitosas...
 		 * Generacion de objetos para su manipulacion en la sesion
 		 */
-		
-		// En ambos casos
-		Proxy.get().addCourseToDB(course_id, course_title, course_label); // Agregamos curso si aun no esta
-		Proxy.get().addTaskToDB(task_id, task_statement, task_code, course_id);
+		Proxy.get().addCourseToDB(course_id, course_title, course_label); // Agregamos el curso a la BBDD si aun no esta
+		Proxy.get().addTaskToDB(task_id, task_statement, task_code, course_id); // Agregamos la tarea a la BBDD si aun no esta
 		
 		if (user_role.equals("Instructor")) { // Si el cliente es un Profesor
-			Proxy.get().setActiveProfesor(user_id, user_firstName, user_lastName, user_email, user_role, course_id);
-		} 
+			Proxy.get().setActiveProfesor(user_id, user_firstName, user_lastName, user_email, null, course_id);
+			Controller.get().updateSolutionsView(task_id, course_id); // Recibe las soluciones de ese contexto, actualiza la vista
+		}
 		else if (user_role.equals("Learner")) { // Si el cliente es un Estudiante
 			// Lo anadimos a la BD si no esta todavia
 			Proxy.get().addStudentToDB(user_id, user_firstName, user_lastName, user_email, user_role, course_id);
-			try { // Creamos proyecto Java
-				Proxy.get().createProject(task_title, user_id, task_id, task_code, Proxy.get().checkFileName(task_class_name));
+			try { // Creamos proyecto Java con la tarea
+				Proxy.get().createProject(task_title, task_code, Proxy.get().checkFileName(task_class_name));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			// Actualizamos las vistas
-			Controller.get().updateTaskForView(task_statement); // Envia la llamada para actualizar la vista enunciado
 		}
+		
+		Controller.get().updateTaskForView(task_statement); // Envia la llamada para actualizar la vista enunciado
 	}
 	
 	public void doError(HttpServletRequest request, HttpServletResponse response, int errorkey) throws IOException {

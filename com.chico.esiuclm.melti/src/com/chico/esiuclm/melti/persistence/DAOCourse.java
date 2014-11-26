@@ -4,12 +4,11 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import com.chico.esiuclm.melti.exceptions.GenericErrorException;
 import com.chico.esiuclm.melti.model.Course;
 
 public class DAOCourse {
 
-	public static void addCourseDB(Course the_course) throws ClassNotFoundException, SQLException, GenericErrorException {
+	public static void addCourseDB(Course the_course) throws ClassNotFoundException, SQLException {
 		Broker broker = Broker.get();
 		Connection db = broker.getDB();
 		CallableStatement cs = db.prepareCall("{call addCourse(?,?,?)}");

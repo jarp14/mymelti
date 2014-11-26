@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -108,68 +109,87 @@ public class Proxy {
 	 */
 	// Agregar un estudiante a la BBDD
 	public void addStudentToDB(String id, String first, String last, String email, String role, String courseId) {
-		Student student = new Student(id, first, last, email, role, courseId);
+		Student student = new Student(id, first, last, email, courseId);
 		try {
-			this.server.addStudent(student);
+			this.server.addStudentDB(student);
 			this.server.setActiveStudent(student); // Valores del estudiante activo
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} catch (GenericErrorException e) {
+		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	// Agregar una tarea
+	// Agregar una tarea a la BBDD
 	public void addTaskToDB(String id, String statement, String code, String course_id) {
 		Task task = new Task(id, statement, code, course_id);
 		try {
-			this.server.addTask(task);
+			this.server.addTaskDB(task);
 			this.server.setActiveTask(task); // Valores de la tarea activa
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	// Agregar un curso
+	// Agregar un curso a la BBDD
 	public void addCourseToDB(String id, String title, String label) {
 		Course course = new Course(id, title, label);
 		try {
-			this.server.addCourse(course);
+			this.server.addCourseDB(course);
 			this.server.setActiveCourse(course); // Valores del curso activo
-		} catch (ClassNotFoundException | SQLException | GenericErrorException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	// Agregar una solucion
-	public void addSolutionToDB(String user_id, String task_id, String course_id, String solved_code) {
-		Solution solution = new Solution(user_id, task_id, course_id, solved_code);
-		try {
-			this.server.addSolution(solution);
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
 		}
-		
 	}
 	
+	// Agregar una solucion a la BBDD
+	public void addSolutionToDB(String user_id, String task_id, String course_id, String solved_code) {
+		Solution solution = new Solution(user_id, task_id, course_id, solved_code);
+		try {
+			this.server.addSolutionDB(solution);
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Acciones relacionadas con el profesor 
+	 */
 	// Guardamos el profesor usando el sistema
-	public void setActiveProfesor(String id, String first, String last, String email, String role, String courseId) {
-		Profesor profesor = new Profesor(id, first, last, email, role, null, courseId);
+	public void setActiveProfesor(String id, String first, String last, String email, String token, String courseId) {
+		Profesor profesor = new Profesor(id, first, last, email, courseId);
 		this.server.setActiveProfesor(profesor); // Valores del profesor activo
+	}
+	
+	// Obtiene las soluciones del curso/tarea accedidos actualmente
+	public void getSolutionsDB(String task_id, String course_id) throws UserNotLoggedException {
+		if (this.server.getActiveProfesor()!=null){
+			try {
+				this.server.getSolutionsDB(task_id, course_id);
+			} catch (ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+			}
+		} else throw new UserNotLoggedException();
+	}
+	
+	// Obtiene los estudiantes del curso/tarea accedidos actualmente
+	public void getStudentsDB(String course_id) throws UserNotLoggedException {
+		if (this.server.getActiveProfesor()!=null) {
+			try {
+				this.server.getStudentsDB(course_id);
+			} catch (ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+			}
+		} else throw new UserNotLoggedException();
 	}
 	
 	/**
 	 * Comprobaciones de seguridad
 	 */
-	
 	// Comprueba que un estudiante esta correctamente logeado en una sesion
 	private boolean studentIsLogged() throws UserNotLoggedException {
 		boolean isLogged = false;
 		
-		if (MeltiServer.get().getActiveStudent() != null && MeltiServer.get().getActiveTask() != null
-				&& MeltiServer.get().getActiveCourse() != null) {
+		if (this.server.getActiveStudent() != null && this.server.getActiveTask() != null
+				&& this.server.getActiveCourse() != null) {
 			isLogged = true;
 		} else throw new UserNotLoggedException();
 		
@@ -180,7 +200,7 @@ public class Proxy {
 	public boolean profesorIsLogged() throws UserNotLoggedException {
 		boolean isLogged = false;
 		
-		if (MeltiServer.get().getActiveProfesor() != null) {
+		if (this.server.getActiveProfesor() != null) {
 			isLogged = true;
 		} else throw new UserNotLoggedException();
 		
@@ -192,9 +212,9 @@ public class Proxy {
 		String[] ids = new String[3];
 		
 		if (studentIsLogged()) {
-			ids[0] = MeltiServer.get().getActiveStudent().getID();
-			ids[1] = MeltiServer.get().getActiveTask().getID();
-			ids[2] = MeltiServer.get().getActiveCourse().getID();
+			ids[0] = this.server.getActiveStudent().getID();
+			ids[1] = this.server.getActiveTask().getID();
+			ids[2] = this.server.getActiveCourse().getID();
 		} else throw new UserNotLoggedException(); 
 		
 		return ids;
@@ -253,9 +273,9 @@ public class Proxy {
 	}
 	
 	// Metodo encargado de crear el proyecto JAVA en el workspace del usuario
-	public void createProject(String projectName, String user_id, String task_id, String fileCode, String fileName) throws Exception {
+	public void createProject(String projectName, String fileCode, String fileName) throws Exception {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-	    IProject project = root.getProject(projectName+"_"+user_id+"_"+task_id); // Para asociarlo al usuario
+	    IProject project = root.getProject(projectName); // Para asociarlo al usuario
 	    IJavaProject javaProject = null;
 	    IProgressMonitor progressMonitor = new NullProgressMonitor();
 	    if(!project.exists()) {
