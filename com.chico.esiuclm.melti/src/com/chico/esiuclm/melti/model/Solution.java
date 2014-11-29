@@ -15,8 +15,8 @@ public class Solution {
 		this.task_id = tid;
 		this.course_id = cid;
 		this.solved_code = scode;
-		this.calification_grade = 0.0;
-		this.calification_comment = "";
+		this.calification_grade = -1.0; // Inicialmente sin calificacion
+		this.calification_comment = ""; // Inicialmente sin calificacion
 	}
 	
 	public Solution(String uid, String tid, String cid, String scode, double cg, String cc) {

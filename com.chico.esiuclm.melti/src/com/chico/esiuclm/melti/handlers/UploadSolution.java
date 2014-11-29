@@ -15,18 +15,13 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 import com.chico.esiuclm.melti.exceptions.UserNotLoggedException;
+import com.chico.esiuclm.melti.model.MeltiServer;
 import com.chico.esiuclm.melti.net.Proxy;
 
 public class UploadSolution extends AbstractHandler {
 
-	/**
-	 * the command has been executed, so extract the needed information
-	 * from the application context.
-	 * @return 
-	 */
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		
 		MessageBox dialog;
 		FileDialog fdialog;
 		BufferedReader br = null;
@@ -69,7 +64,8 @@ public class UploadSolution extends AbstractHandler {
 			
 			// Pide autorizar la subida de la tarea seleccionada al usuario
 			boolean result = MessageDialog.openConfirm(window.getShell(), "Confirmación de envío", 
-					"Tarea a enviar: "+file_path+"\n\n"
+					"Alumno: "+MeltiServer.get().getActiveStudent().getFirst_name()+":"+MeltiServer.get().getActiveStudent().getEmail()+
+					"\n\nTarea a enviar: "+file_path+"\n\n"
 					+"¿Estás seguro de enviar esta tarea? No podrás modificar esta acción.");
 			if (result) { // OK
 				Proxy.get().addSolutionToDB(ids[0], ids[1], ids[2], code);
@@ -77,7 +73,6 @@ public class UploadSolution extends AbstractHandler {
 				dialog.setMessage("Tarea subida con éxito");
 				dialog.open();
 			}
-			
 		}
 		
 		return null;

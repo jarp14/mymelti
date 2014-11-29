@@ -93,8 +93,9 @@ public class BltiServlet extends HttpServlet {
 		 * Tras las comprobaciones exitosas...
 		 * Generacion de objetos para su manipulacion en la sesion
 		 */
+		String tclass_name = Proxy.get().checkFileName(task_class_name);
 		Proxy.get().addCourseToDB(course_id, course_title, course_label); // Agregamos el curso a la BBDD si aun no esta
-		Proxy.get().addTaskToDB(task_id, task_statement, task_code, course_id); // Agregamos la tarea a la BBDD si aun no esta
+		Proxy.get().addTaskToDB(task_id, task_title, tclass_name, task_statement, task_code, course_id); // Agregamos la tarea a la BBDD si aun no esta
 		
 		if (user_role.equals("Instructor")) { // Si el cliente es un Profesor
 			Proxy.get().setActiveProfesor(user_id, user_firstName, user_lastName, user_email, null, course_id);
@@ -104,7 +105,8 @@ public class BltiServlet extends HttpServlet {
 			// Lo anadimos a la BD si no esta todavia
 			Proxy.get().addStudentToDB(user_id, user_firstName, user_lastName, user_email, user_role, course_id);
 			try { // Creamos proyecto Java con la tarea
-				Proxy.get().createProject(task_title, task_code, Proxy.get().checkFileName(task_class_name));
+				boolean projectExists = Proxy.get().createProject(task_title, user_firstName+user_lastName, task_code, 
+						tclass_name, false);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

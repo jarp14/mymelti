@@ -30,14 +30,10 @@ public class DAOStudent {
 		cs.setString(2, solution.getTaskID());
 		cs.setString(3, solution.getCourseID());
 		cs.setString(4, solution.getSvdCode());
-		cs.setDouble(5, 0.0);
-		cs.setString(6, "");
+		cs.setDouble(5, solution.getCalification());
+		cs.setString(6, solution.getCComment());
 		cs.executeUpdate();
 		db.close();
-	}
-	
-	public static void removeStudentDB(Student the_student) {
-		
 	}
 	
 }

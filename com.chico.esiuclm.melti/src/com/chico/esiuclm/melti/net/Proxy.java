@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -119,8 +118,8 @@ public class Proxy {
 	}
 	
 	// Agregar una tarea a la BBDD
-	public void addTaskToDB(String id, String statement, String code, String course_id) {
-		Task task = new Task(id, statement, code, course_id);
+	public void addTaskToDB(String id, String task_title, String task_className, String statement, String code, String course_id) {
+		Task task = new Task(id, task_title, task_className, statement, code, course_id);
 		try {
 			this.server.addTaskDB(task);
 			this.server.setActiveTask(task); // Valores de la tarea activa
@@ -273,45 +272,49 @@ public class Proxy {
 	}
 	
 	// Metodo encargado de crear el proyecto JAVA en el workspace del usuario
-	public void createProject(String projectName, String fileCode, String fileName) throws Exception {
+	public boolean createProject(String projectName, String combination, String fileCode, String fileName, 
+			boolean profesor) throws Exception {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-	    IProject project = root.getProject(projectName); // Para asociarlo al usuario
+	    IProject project = root.getProject(projectName+"_"+combination); // Para asociarlo a un usuario
 	    IJavaProject javaProject = null;
 	    IProgressMonitor progressMonitor = new NullProgressMonitor();
-	    if(!project.exists()) {
-	    	project.create(progressMonitor);
-	    	project.open(progressMonitor);
-	 
-	    	// Agregamos parametros para Java
-	    	IProjectDescription description = project.getDescription(); 	
-	    	description.setNatureIds(new String[] { JavaCore.NATURE_ID });
 	    
-	    	// Generar proyecto Java
-	    	project.setDescription(description, progressMonitor);
-	    	javaProject = JavaCore.create(project);
+	    if (project.exists()) return true;
 	    
-	    	// Configurar buildpath
-	    	IClasspathEntry[] buildPath = {
-	    		JavaCore.newSourceEntry(project.getFullPath().append("src")),
-	    				JavaRuntime.getDefaultJREContainerEntry() };
-	    	javaProject.setRawClasspath(buildPath, project.getFullPath().append("bin"), progressMonitor);
-	     
-	    	// Crear carpeta para el código
-	    	IFolder folder = project.getFolder("src");
-	    	folder.create(true, true, null);
-	     
-	    	// Crear carpeta para elementos java
-	    	IPackageFragmentRoot srcFolder = javaProject.getPackageFragmentRoot(folder);
-	     
-	    	// Crear fragmento de paquete
-	    	IPackageFragment fragment = srcFolder.createPackageFragment(projectName.toLowerCase(), true, progressMonitor);
-	     
-	    	StringBuffer buffer = new StringBuffer();
-	    	buffer.append("package "+fragment.getElementName()+";\n");
-	    	buffer.append(fileCode);
-	    	
-	    	fragment.createCompilationUnit(fileName, buffer.toString(), false, progressMonitor);
-	    }
+    	project.create(progressMonitor);
+    	project.open(progressMonitor);
+ 
+    	// Agregamos parametros para Java
+    	IProjectDescription description = project.getDescription(); 	
+    	description.setNatureIds(new String[] { JavaCore.NATURE_ID });
+    
+    	// Generar proyecto Java
+    	project.setDescription(description, progressMonitor);
+    	javaProject = JavaCore.create(project);
+    
+    	// Configurar buildpath
+    	IClasspathEntry[] buildPath = {
+    		JavaCore.newSourceEntry(project.getFullPath().append("src")),
+    				JavaRuntime.getDefaultJREContainerEntry() };
+    	javaProject.setRawClasspath(buildPath, project.getFullPath().append("bin"), progressMonitor);
+     
+    	// Crear carpeta para el código
+    	IFolder folder = project.getFolder("src");
+    	folder.create(true, true, null);
+     
+    	// Crear carpeta para elementos java
+    	IPackageFragmentRoot srcFolder = javaProject.getPackageFragmentRoot(folder);
+     
+    	// Crear fragmento de paquete
+    	IPackageFragment fragment = srcFolder.createPackageFragment(projectName.toLowerCase(), true, progressMonitor);
+     
+    	StringBuffer buffer = new StringBuffer();
+    	if(!profesor) buffer.append("package "+fragment.getElementName()+";\n");
+    	buffer.append(fileCode);
+    	
+    	fragment.createCompilationUnit(fileName, buffer.toString(), false, progressMonitor);
+    	
+    	return false;
 	}
 	
 	// Comprobaciones relacionadas con las credenciales del usuario y las preferencias en Eclipse

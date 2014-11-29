@@ -28,7 +28,7 @@ public class DAOProfesor {
 			solutions.add(aux);
 		}
 		
-		MeltiServer.get().getActiveCourse().setCourseSolutions(solutions);
+		MeltiServer.get().getActiveCourse().setCourseSolutions(solutions); // Las guardamos en el curso activo
 		db.close();
 	}
 
@@ -47,7 +47,7 @@ public class DAOProfesor {
 			students.add(aux);
 		}
 		
-		MeltiServer.get().getActiveCourse().setCourseStudents(students);
+		MeltiServer.get().getActiveCourse().setCourseStudents(students); // Los guardamos en el curso activo
 		db.close();
 	}
 	

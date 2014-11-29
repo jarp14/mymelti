@@ -42,8 +42,18 @@
       </command>
       <command
             categoryId="com.chico.esiuclm.melti.commands.category"
-            id="com.chico.esiuclm.melti.commands.restClient"
-            name="Enviar tarea">
+            id="com.chico.esiuclm.melti.commands.uploadSolution"
+            name="Enviar solución">
+      </command>
+      <command
+            categoryId="com.chico.esiuclm.melti.commands.category"
+            id="com.chico.esiuclm.melti.commands.evaluate"
+            name="Ver solución">
+      </command>
+      <command
+            categoryId="com.chico.esiuclm.melti.commands.category"
+            id="com.chico.esiuclm.melti.commands.qualify"
+            name="Calificar">
       </command>
    </extension>
    
@@ -59,7 +69,15 @@
       </handler>
       <handler
             class="com.chico.esiuclm.melti.handlers.UploadSolution"
-            commandId="com.chico.esiuclm.melti.commands.restClient">
+            commandId="com.chico.esiuclm.melti.commands.uploadSolution">
+      </handler>
+      <handler
+            class="com.chico.esiuclm.melti.handlers.Evaluate"
+            commandId="com.chico.esiuclm.melti.commands.evaluate">
+      </handler>
+      <handler
+            class="com.chico.esiuclm.melti.handlers.Qualify"
+            commandId="com.chico.esiuclm.melti.commands.qualify">
       </handler>
    </extension>
    <extension
@@ -77,7 +95,7 @@
             sequence="M1+2">
       </key>
       <key
-            commandId="com.chico.esiuclm.melti.commands.restClient"
+            commandId="com.chico.esiuclm.melti.commands.uploadSolution"
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+4">
@@ -107,9 +125,9 @@
                   style="push">
             </command>
             <command
-                  commandId="com.chico.esiuclm.melti.commands.restClient"
+                  commandId="com.chico.esiuclm.melti.commands.uploadSolution"
                   icon="icons/upload.png"
-                  id="com.chico.esiuclm.melti.menus.restClient"
+                  id="com.chico.esiuclm.melti.menus.uploadSolution"
                   mnemonic="U"
                   style="push">
             </command>
@@ -134,11 +152,11 @@
                   tooltip="Parar escucha">
             </command>
             <command
-                  commandId="com.chico.esiuclm.melti.commands.restClient"
+                  commandId="com.chico.esiuclm.melti.commands.uploadSolution"
                   icon="icons/upload.png"
-                  id="com.chico.esiuclm.melti.toolbars.restClient"
+                  id="com.chico.esiuclm.melti.toolbars.uploadSolution"
                   style="push"
-                  tooltip="Enviar tarea">
+                  tooltip="Enviar solución">
             </command>
          </toolbar>
       </menuContribution>
@@ -160,18 +178,10 @@
       </view>
       <view
             category="com.chico.esiuclm.melti"
-            class="com.chico.esiuclm.melti.gui.views.ProfesorView"
-            icon="icons/user.png"
-            id="com.chico.esiuclm.melti.views.userView"
-            name="Usuario"
-            restorable="true">
-      </view>
-      <view
-            category="com.chico.esiuclm.melti"
             class="com.chico.esiuclm.melti.gui.views.SolutionsView"
-            icon="icons/sample.gif"
+            icon="icons/solutions.png"
             id="com.chico.esiuclm.melti.views.solutionsView"
-            name="Monitor"
+            name="Soluciones"
             restorable="true">
       </view>
    </extension>

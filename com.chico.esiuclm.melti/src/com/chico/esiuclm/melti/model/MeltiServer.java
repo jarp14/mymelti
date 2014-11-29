@@ -1,15 +1,14 @@
 package com.chico.esiuclm.melti.model;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class MeltiServer {
 	
 	private static MeltiServer yo;
-	private Student the_student;
-	private Profesor the_profesor;
-	private Task the_task;
-	private Course the_course;
+	private Student the_student; // Guarda el estudiante que usa el plugin
+	private Profesor the_profesor; // Guarda el profesor que esta usando el plugin
+	private Task the_task; // La tarea que es accedida
+	private Course the_course; // El curso que es accedido
 	
 	private MeltiServer() {}
 	
@@ -28,26 +27,26 @@ public class MeltiServer {
 	}
 	
 	public void addTaskDB(Task task) throws ClassNotFoundException, SQLException {
-		this.the_course.getCourseTasks().add(task);
 		task.add(); // Agrega la tarea a la BBDD
 	}
 	
 	public void addSolutionDB(Solution solution) throws ClassNotFoundException, SQLException {
-		this.the_course.getCourseSolutions().add(solution);
 		solution.add(); // Agrega la resolucion de una tarea a la BBDD
 	}
 	
 	public void addStudentDB(Student student) throws ClassNotFoundException, SQLException {
-		this.the_course.getCourseStudents().add(student);
 		student.add(); // Agrega el estudiante a la BBDD
 	}
 	
+	/*
+	 * Llamadas, acciones del profesor
+	 */
 	public void getSolutionsDB(String task_id, String course_id) throws ClassNotFoundException, SQLException {
-		this.the_profesor.getSolutions(task_id, course_id); // Recoge y actualiza el curso con las soluciones
+		this.the_profesor.getSolutions(task_id, course_id); // Recoge las soluciones de la BBDD y actualiza el curso
 	}
 	
 	public void getStudentsDB(String course_id) throws ClassNotFoundException, SQLException {
-		this.the_profesor.getStudents(course_id);
+		this.the_profesor.getStudents(course_id); // Recoge los estudiantes de la BBDD y actualiza el curso
 	}
 	
 	/**

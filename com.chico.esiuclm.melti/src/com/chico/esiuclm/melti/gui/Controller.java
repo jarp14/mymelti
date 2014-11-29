@@ -13,11 +13,12 @@ import com.chico.esiuclm.melti.net.Proxy;
 public class Controller {
 	private static Controller yo;
 	private Task active_task; // Instancia de tarea mostrada en la vista StatementView
-	private ArrayList<Student> students_with_solutions;
+	private ArrayList<WrappedSolution> wrapped_solutions; // Array con las soluciones para la vista SolutionsView
+	private WrappedSolution active_wsolution;
 	
 	public Controller() { // Valores iniciales
 		active_task = new Task("Enunciado del problema a resolver");
-		students_with_solutions = new ArrayList<Student>();
+		wrapped_solutions = new ArrayList<WrappedSolution>();
 	}
 	
 	public static Controller get() {
@@ -30,6 +31,10 @@ public class Controller {
 	public Task getActiveTask() {
 		return this.active_task;
 	}
+
+	public ArrayList<WrappedSolution> getWrappedSolutions() {
+		return wrapped_solutions;
+	}
 	
 	public void updateTaskForView(String task_statement) { // Envia la llamada a la vista para refrescar
 		this.active_task.setStatement(task_statement);
@@ -37,37 +42,46 @@ public class Controller {
 
 	public void updateSolutionsView(String task_id, String course_id) {
 		prepareSolutionsView(task_id, course_id);
-		ArrayList<Solution> solutions = MeltiServer.get().getActiveCourse().getCourseSolutions(); // Recoge las soluciones de esa tarea
-		getStudentsWithSolutions(MeltiServer.get().getActiveCourse().getCourseStudents(), solutions);
-		Task task = MeltiServer.get().getActiveTask(); // Recoge la informacion de esa tarea
-		Course course = MeltiServer.get().getActiveCourse();
 	}
 	
 	private void prepareSolutionsView(String task_id, String course_id) {
 		try {
-			Proxy.get().getSolutionsDB(task_id, course_id);
-			Proxy.get().getStudentsDB(course_id);
+			Proxy.get().getSolutionsDB(task_id, course_id); // Recoge las soluciones de ese contexto de la BBDD
+			Proxy.get().getStudentsDB(course_id); // Recoge los estudiantes de ese contexto de la BBDD
 		} catch (UserNotLoggedException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	private void getStudentsWithSolutions(ArrayList<Student> course_students, ArrayList<Solution> course_solutions) {
-		String course_student_id, student_id;
 		
-		for (int i=0; i<course_students.size(); i++) {
-			student_id = course_students.get(i).getID();
-			for (int j=0; j<course_solutions.size(); j++) {
-				course_student_id = course_solutions.get(j).getStudentID();
-				if (course_student_id.equals(student_id)) {
-					students_with_solutions.add(course_students.get(i));
+		Course course = MeltiServer.get().getActiveCourse(); // Recoge la informacion del curso
+		Task task = MeltiServer.get().getActiveTask(); // Recoge la informacion de la tarea
+		ArrayList<Student> course_students = MeltiServer.get().getActiveCourse().getCourseStudents(); // Recoge los estudiantes de ese curso
+		ArrayList<Solution> solutions = MeltiServer.get().getActiveCourse().getCourseSolutions(); // Recoge las soluciones de esa tarea
+		
+		WrappedSolution aux;
+		Student st;
+		ArrayList<WrappedSolution> wsolutions = new ArrayList<WrappedSolution>();
+		for(int i=0; i<solutions.size(); i++) {
+			for(int j=0; j<course_students.size(); j++) {
+				if (solutions.get(i).getStudentID().equals(course_students.get(j).getID())) {
+					st = course_students.get(j);
+					aux = new WrappedSolution(solutions.get(i),
+							course.getTitle(), 
+							task.getTitle(),
+							task.getTaskClassName(),
+							st.getFirst_name()+" "+st.getLast_name(), 
+							st.getEmail());
+					wsolutions.add(aux);
 				}
 			}
 		}
+		wrapped_solutions = wsolutions; // Actualizamos la informacion a mostrar en la vista
 	}
 
-	public ArrayList<Student> getStudentsWithSolution() {
-		return this.students_with_solutions;
+	public WrappedSolution getActiveWrappedSolution() {
+		return this.active_wsolution;
+	}
+	public void setActiveWrappedSolution(WrappedSolution ws) {
+		this.active_wsolution = ws;
 	}
 	
 }

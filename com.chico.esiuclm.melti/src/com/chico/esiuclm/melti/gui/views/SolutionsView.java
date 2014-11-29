@@ -1,47 +1,132 @@
 package com.chico.esiuclm.melti.gui.views;
 
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.NotEnabledException;
+import org.eclipse.core.commands.NotHandledException;
+import org.eclipse.core.commands.common.NotDefinedException;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.services.IServiceLocator;
 
 import com.chico.esiuclm.melti.gui.Controller;
-import com.chico.esiuclm.melti.model.Student;
+import com.chico.esiuclm.melti.gui.WrappedSolution;
 
 public class SolutionsView extends ViewPart {
 
+	public static final String ID = "com.chico.esiuclm.melti.views.solutionsView";
 	private TableViewer viewer;
+	private Action seeSolutionAction, qualifyAction;
 	
 	@Override
 	public void createPartControl(Composite parent) {
-		GridLayout layout = new GridLayout(2, false);
-		parent.setLayout(layout);       
+		TableColumnLayout layout = new TableColumnLayout();
+		parent.setLayout(layout);
 		
-		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
-		createColumns(parent, viewer);
+		viewer = new TableViewer(parent, SWT.BORDER | SWT.FULL_SELECTION);
 		final Table table = viewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		
-		viewer.setContentProvider(new ArrayContentProvider());
-		viewer.setInput(Controller.get().getStudentsWithSolution());
+		TableViewerColumn tvc1 = new TableViewerColumn(viewer, SWT.NONE);
+		TableColumn cTaskTitle = tvc1.getColumn();
+		layout.setColumnData(cTaskTitle, new ColumnWeightData(4, ColumnWeightData.MINIMUM_WIDTH, true));
+		cTaskTitle.setText("Tarea");
+		cTaskTitle.setResizable(true);
+		cTaskTitle.setMoveable(true);
 		
+		TableViewerColumn tvc2 = new TableViewerColumn(viewer, SWT.NONE);
+		TableColumn cName = tvc2.getColumn();
+		layout.setColumnData(cName, new ColumnWeightData(6, ColumnWeightData.MINIMUM_WIDTH, true));
+		cName.setText("Alumno");
+		cName.setResizable(true);
+		cName.setMoveable(true);
+
+		TableViewerColumn tvc3 = new TableViewerColumn(viewer, SWT.NONE);
+		TableColumn cEmail = tvc3.getColumn();
+		layout.setColumnData(cEmail, new ColumnWeightData(6, ColumnWeightData.MINIMUM_WIDTH, true));
+		cEmail.setText("E-mail");
+		cEmail.setResizable(true);
+		cEmail.setMoveable(true);
+
+		TableViewerColumn tvc4 = new TableViewerColumn(viewer, SWT.NONE);
+		TableColumn cCourse = tvc4.getColumn();
+		layout.setColumnData(cCourse, new ColumnWeightData(6, ColumnWeightData.MINIMUM_WIDTH, true));
+		cCourse.setText("Curso");
+		cCourse.setResizable(true);
+		cCourse.setMoveable(true);
+
+		TableViewerColumn tvc5 = new TableViewerColumn(viewer, SWT.NONE);
+		TableColumn cGrade = tvc5.getColumn();
+		layout.setColumnData(cGrade, new ColumnWeightData(4, ColumnWeightData.MINIMUM_WIDTH, true));
+		cGrade.setText("Calificación");
+		cGrade.setResizable(true);
+		cGrade.setMoveable(true);
+		
+		viewer.setContentProvider(new ArrayContentProvider());
+		viewer.setLabelProvider(new TableLabelProvider());
+		
+		viewer.setInput(Controller.get().getWrappedSolutions());
 		getSite().setSelectionProvider(viewer);
 		
-		GridData gridData = new GridData();
-		gridData.verticalAlignment = GridData.FILL;
-		gridData.horizontalSpan = 2;
-		gridData.grabExcessHorizontalSpace = true;
-		gridData.grabExcessVerticalSpace = true;
-		gridData.horizontalAlignment = GridData.FILL;
-		viewer.getControl().setLayoutData(gridData);
+		createActions();
+		createContextMenu();
+		//createToolbar();
+		
+		hookDoubleClick();
+	}
+	
+	private class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
+		public Image getColumnImage(Object element, int columnIndex) {
+			return null;
+		}
+		public String getColumnText(Object element, int columnIndex) {
+			WrappedSolution ws = (WrappedSolution) element;
+			String result = "";
+			switch(columnIndex){
+			case 0:
+				result = ws.getTask_title();
+				break;
+			case 1:
+				result = ws.getStudent_name_family();
+				break;
+			case 2:
+				result = ws.getStudent_email();
+				break;
+			case 3:
+				result = ws.getCourse_title();
+				break;
+			case 4:
+				if(ws.getCalification()==-1.0) result = "No calificado";
+				else result = ws.getCalification()+"";
+				break;
+			default:
+				result = "";
+			}
+			return result;
+		}
 	}
 
 	@Override
@@ -49,69 +134,87 @@ public class SolutionsView extends ViewPart {
 		viewer.getControl().setFocus();
 	}
 	
-	private void createColumns(final Composite parent, final TableViewer viewer) {
-		String[] titles = {"ID", "Nombre", "Apellidos", "Email", "ID Curso" };
-		int[] bounds = { 100, 100, 100, 100, 100 };
+	public void refresh() {
+		// Llamada al controlador para que actualice el Array TODO
+		viewer.refresh();
+	}
 		
-		TableViewerColumn col = createTableViewerColumn(titles[0], bounds[0], 0);
-		col.setLabelProvider(new ColumnLabelProvider() {
-			public String getText(Object element) {
-				Student s = (Student) element;
-				return s.getID();
+	public void createActions() {
+		seeSolutionAction = new Action("Ver solución") {
+			public void run() {
+				seeSolution();
+			}
+		};
+		
+		qualifyAction = new Action("Calificar") {
+			public void run() {
+				qualifySolution();
+			}
+		};
+	}
+	
+	private void createContextMenu() {
+		MenuManager menuMgr = new MenuManager();
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager mgr) {
+				fillContextMenu(mgr);
 			}
 		});
 		
-		col = createTableViewerColumn(titles[1], bounds[1], 1);
-		col.setLabelProvider(new ColumnLabelProvider() {
-			public String getText(Object element) {
-				Student s = (Student) element;
-				return s.getFirst_name();
-			}
-		});
+		Menu menu = menuMgr.createContextMenu(viewer.getControl());
+		viewer.getControl().setMenu(menu);
 		
-		col = createTableViewerColumn(titles[2], bounds[2], 2);
-		col.setLabelProvider(new ColumnLabelProvider() {
-			public String getText(Object element) {
-				Student s = (Student) element;
-				return s.getLast_name();
-			}
-		});
-		
-		col = createTableViewerColumn(titles[3], bounds[3], 3);
-		col.setLabelProvider(new ColumnLabelProvider() {
-			public String getText(Object element) {
-				Student s = (Student) element;
-				return s.getEmail();
-			}
-		});
-		
-		col = createTableViewerColumn(titles[4], bounds[4], 4);
-		col.setLabelProvider(new ColumnLabelProvider() {
-			public String getText(Object element) {
-				Student s = (Student) element;
-				return s.getCourseID();
-			}
-			
-			/*public Image getImage(Object element) {
-				//if ((Student)element).isOnline()) {
-				// return CHECKED;
-				return UNCHECKED;
-			}*/
+		getSite().registerContextMenu(menuMgr, viewer);
+	}
+	
+	private void hookDoubleClick() {
+		viewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				seeSolution();
+			}	
 		});
 	}
 	
-	private TableViewerColumn createTableViewerColumn(String title, int bound, final int colNumber) {
-		final TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
-		final TableColumn column = viewerColumn.getColumn();
-		column.setText(title);
-		column.setWidth(bound);
-		column.setResizable(true);
-		column.setMoveable(true);
-		return viewerColumn;
+	private void fillContextMenu(IMenuManager mgr) {
+		mgr.add(seeSolutionAction);
+		mgr.add(qualifyAction);
 	}
 	
-	public TableViewer getViewer() {
-		return viewer;
+	private void seeSolution() {
+		executeCommand("com.chico.esiuclm.melti.commands.evaluate");
 	}
+	
+	private void qualifySolution() {
+		executeCommand("com.chico.esiuclm.melti.commands.qualify");
+	}
+	
+	private void executeCommand(String the_command) {
+		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+		if (selection.isEmpty()) return;
+		WrappedSolution a = (WrappedSolution) selection.getFirstElement();
+		Controller.get().setActiveWrappedSolution(a);
+		IServiceLocator serviceLocator = PlatformUI.getWorkbench();
+		ICommandService commandService = (ICommandService) serviceLocator.getService(ICommandService.class);
+		Command command = commandService.getCommand(the_command);
+		try {
+			command.executeWithChecks(new ExecutionEvent());
+		} catch (ExecutionException | NotDefinedException
+				| NotEnabledException | NotHandledException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/*private void createMenu() {
+		IMenuManager mgr = getViewSite().getActionBars().getMenuManager();
+		mgr.add(selectAllAction);
+	}*/
+
+	/*private void createToolbar() {
+		IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
+		mgr.add(selectAllAction);
+	
+	}*/
 
 }

@@ -20,10 +20,12 @@ public class Profesor extends User {
 		this.token = token;
 	}
 
+	// Pide las soluciones de un contexto (curso, tarea) determinado
 	public void getSolutions(String task_id, String course_id) throws ClassNotFoundException, SQLException {
 		DAOProfesor.getSolutionsDB(task_id, course_id);
 	}
 
+	// Pide los estudiantes del curso
 	public void getStudents(String course_id) throws ClassNotFoundException, SQLException {
 		DAOProfesor.getStudentsDB(course_id);
 	}
