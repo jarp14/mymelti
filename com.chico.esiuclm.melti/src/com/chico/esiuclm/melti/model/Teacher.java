@@ -2,13 +2,13 @@ package com.chico.esiuclm.melti.model;
 
 import java.sql.SQLException;
 
-import com.chico.esiuclm.melti.persistence.DAOProfesor;
+import com.chico.esiuclm.melti.persistence.DAOTeacher;
 
-public class Profesor extends User {
+public class Teacher extends User {
 	
 	private String token;
 	
-	public Profesor(String id, String first, String last, String email, String courseId) {
+	public Teacher(String id, String first, String last, String email, String courseId) {
 		super(id, first, last, email, "Instructor", courseId);
 	}
 
@@ -22,12 +22,17 @@ public class Profesor extends User {
 
 	// Pide las soluciones de un contexto (curso, tarea) determinado
 	public void getSolutions(String task_id, String course_id) throws ClassNotFoundException, SQLException {
-		DAOProfesor.getSolutionsDB(task_id, course_id);
+		DAOTeacher.getSolutionsDB(task_id, course_id);
 	}
 
 	// Pide los estudiantes del curso
 	public void getStudents(String course_id) throws ClassNotFoundException, SQLException {
-		DAOProfesor.getStudentsDB(course_id);
+		DAOTeacher.getStudentsDB(course_id);
+	}
+
+	// Sube la calificacion de la tarea de un alumno
+	public void uploadQualification(Solution solution) throws ClassNotFoundException, SQLException {
+		DAOTeacher.addQualificationDB(solution);
 	}
 	
 }

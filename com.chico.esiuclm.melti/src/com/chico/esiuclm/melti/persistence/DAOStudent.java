@@ -4,6 +4,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.chico.esiuclm.melti.exceptions.SolvedErrorException;
 import com.chico.esiuclm.melti.model.Solution;
 import com.chico.esiuclm.melti.model.Student;
 
@@ -34,6 +35,19 @@ public class DAOStudent {
 		cs.setString(6, solution.getCComment());
 		cs.executeUpdate();
 		db.close();
+	}
+
+	public static void checkIfSolutionSolvedDB(String[] task_context) throws SQLException, ClassNotFoundException, SolvedErrorException {
+		Broker broker=Broker.get();
+		Connection bd=broker.getDB();
+		CallableStatement cs=bd.prepareCall("{call checkSolution(?,?,?,?)}");
+		cs.setString(1, task_context[0]);
+		cs.setString(2, task_context[1]);
+		cs.setString(3, task_context[2]);
+		cs.registerOutParameter(4, java.sql.Types.BOOLEAN);
+		cs.executeUpdate();
+		if (cs.getBoolean(4)) throw new SolvedErrorException(); //Si el usuario esta ya onLine
+		bd.close();
 	}
 	
 }

@@ -28,40 +28,32 @@ public class Task extends ModelObject {
 	public String getID() {
 		return id;
 	}
-
 	public void setID(String id) {
 		this.id = id;
 	}
-
 	public String getStatement() {
 		return statement;
 	}
-	
 	public String getTaskClassName() {
 		return this.task_className;
 	}
-	
 	public void setStatement(String s) { // Lanza una llamada para la vista StatementView
 		firePropertyChange("statement", this.statement, this.statement = s);
 	}
-	
 	public String getCode() {
 		return code;
 	}
-	
 	public void setCode(String code) {
 		this.code = code;
 	}
-	
 	public String getCourseID() {
 		return this.course_id;
+	}
+	public String getTitle() {
+		return this.task_title;
 	}
 	
 	public void add() throws ClassNotFoundException, SQLException {
 		DAOTask.addTaskDB(this);
-	}
-
-	public String getTitle() {
-		return this.task_title;
 	}
 }

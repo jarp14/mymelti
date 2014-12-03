@@ -36,19 +36,24 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.chico.esiuclm.melti.MeltiPlugin;
+import com.chico.esiuclm.melti.exceptions.EmailErrorException;
 import com.chico.esiuclm.melti.exceptions.GenericErrorException;
 import com.chico.esiuclm.melti.exceptions.NotCodeException;
 import com.chico.esiuclm.melti.exceptions.NotProfesorException;
 import com.chico.esiuclm.melti.exceptions.NotStatementException;
 import com.chico.esiuclm.melti.exceptions.NotStudentException;
+import com.chico.esiuclm.melti.exceptions.SolvedErrorException;
+import com.chico.esiuclm.melti.exceptions.StudentNotLoggedException;
+import com.chico.esiuclm.melti.exceptions.TeacherNotLoggedException;
 import com.chico.esiuclm.melti.exceptions.UserNotLoggedException;
+import com.chico.esiuclm.melti.gui.Controller;
 import com.chico.esiuclm.melti.gui.console.MeltiConsole;
 import com.chico.esiuclm.melti.model.Course;
 import com.chico.esiuclm.melti.model.MeltiServer;
-import com.chico.esiuclm.melti.model.Profesor;
 import com.chico.esiuclm.melti.model.Solution;
 import com.chico.esiuclm.melti.model.Student;
 import com.chico.esiuclm.melti.model.Task;
+import com.chico.esiuclm.melti.model.Teacher;
 import com.chico.esiuclm.melti.net.oauth.OAuthAccessor;
 import com.chico.esiuclm.melti.net.oauth.OAuthConsumer;
 import com.chico.esiuclm.melti.net.oauth.OAuthException;
@@ -69,10 +74,13 @@ public class Proxy {
 	private static Proxy yo; // Instancia del proxy
 	private Server jettyserver; // Contenedor de servlets
 	private MeltiServer server; // Manejador de objetos de Melti
+	private Controller controller; // Controlador con informacion para las vistas
+	final MessageConsoleStream my_console = MeltiConsole.getMessageConsoleStream("Console");
 	
 	public Proxy() {
 		initJettyServer();
 		this.server = MeltiServer.get();
+		this.controller = Controller.get();
 	}
 	
 	// Singleton
@@ -116,10 +124,15 @@ public class Proxy {
 	public void addStudentToDB(String id, String first, String last, String email, String role, String courseId) {
 		Student student = new Student(id, first, last, email, courseId);
 		try {
-			this.server.addStudentDB(student);
-			this.server.setActiveStudent(student); // Valores del estudiante activo
+			server.addStudentDB(student);
+			server.setActiveStudent(student); // Valores del estudiante activo
 		} catch (ClassNotFoundException | SQLException e) {
-			e.printStackTrace();
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					my_console.setColor(new Color(null, new RGB(255,0,0)));
+					my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+				}
+			});
 		}
 	}
 	
@@ -127,10 +140,16 @@ public class Proxy {
 	public void addTaskToDB(String id, String task_title, String task_className, String statement, String code, String course_id) {
 		Task task = new Task(id, task_title, task_className, statement, code, course_id);
 		try {
-			this.server.addTaskDB(task);
-			this.server.setActiveTask(task); // Valores de la tarea activa
+			server.addTaskDB(task);
+			server.setActiveTask(task); // Valores de la tarea activa
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					my_console.setColor(new Color(null, new RGB(255,0,0)));
+					my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+				}
+			});
 		}
 	}
 	
@@ -138,88 +157,161 @@ public class Proxy {
 	public void addCourseToDB(String id, String title, String label) {
 		Course course = new Course(id, title, label);
 		try {
-			this.server.addCourseDB(course);
-			this.server.setActiveCourse(course); // Valores del curso activo
+			server.addCourseDB(course);
+			server.setActiveCourse(course); // Valores del curso activo
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					my_console.setColor(new Color(null, new RGB(255,0,0)));
+					my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+				}
+			});
 		}
 	}
 	
-	// Agregar una solucion a la BBDD
-	public void addSolutionToDB(String user_id, String task_id, String course_id, String solved_code) {
-		Solution solution = new Solution(user_id, task_id, course_id, solved_code);
-		try {
-			this.server.addSolutionDB(solution);
-		} catch (ClassNotFoundException | SQLException e) {
-			e.printStackTrace();
-		}
+	// Guardamos el profesor usando el sistema
+	public void setActiveTeacher(String id, String first, String last, String email, String token, String courseId) {
+		Teacher teacher = new Teacher(id, first, last, email, courseId);
+		server.setActiveTeacher(teacher);
 	}
 	
 	/**
-	 * Acciones relacionadas con el profesor 
+	 * Llamadas al controlador para actualizar vistas 
 	 */
-	// Guardamos el profesor usando el sistema
-	public void setActiveProfesor(String id, String first, String last, String email, String token, String courseId) {
-		Profesor profesor = new Profesor(id, first, last, email, courseId);
-		this.server.setActiveProfesor(profesor); // Valores del profesor activo
+	public void updateStudentTasksView(String task_id, String course_id) {
+		
+	}
+
+	public void updateTaskView(String task_statement) {
+		controller.updateTaskView(task_statement);
+	}
+
+	public void updateSolutionsView(String task_id, String course_id) {
+		controller.updateSolutionsView(task_id, course_id);
 	}
 	
-	// Obtiene las soluciones del curso/tarea accedidos actualmente
-	public void getSolutionsDB(String task_id, String course_id) throws UserNotLoggedException {
-		if (this.server.getActiveProfesor()!=null){
+	/**
+	 * ACCIONES QUE REALIZA UN ESTUDIANTE
+	 */
+	// Sube una solucion a la BBDD
+	public void uploadSolutionToDB(String user_id, String task_id, String course_id, String solved_code) throws StudentNotLoggedException, TeacherNotLoggedException {
+		if(contextPrepared(true)) {
+			Solution solution = new Solution(user_id, task_id, course_id, solved_code);
 			try {
-				this.server.getSolutionsDB(task_id, course_id);
+				server.addSolutionDB(solution);
 			} catch (ClassNotFoundException | SQLException e) {
 				e.printStackTrace();
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						my_console.setColor(new Color(null, new RGB(255,0,0)));
+						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+					}
+				});
 			}
-		} else throw new UserNotLoggedException();
+		} else throw new StudentNotLoggedException();
+	}
+	
+	public void checkIfSolutionSolved(String[] task_context) throws ClassNotFoundException, SQLException, SolvedErrorException {
+		server.checkIfSolutionSolvedDB(task_context);
+	}
+	
+	/**
+	 * ACCIONES QUE REALIZA UN PROFESOR 
+	 */
+	// Califica la solucion de un alumno, actualiza su solucion en la BBDD
+	public void addQualificationToDB(String user_id, String task_id, String course_id, String solved_code, double grade, String comments) throws StudentNotLoggedException, TeacherNotLoggedException {
+		if(contextPrepared(false)) {
+			Solution solution = new Solution(user_id, task_id, course_id, solved_code, grade, comments);
+			try {
+				server.addQualificationDB(solution);
+			} catch (ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						my_console.setColor(new Color(null, new RGB(255,0,0)));
+						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+					}
+				});
+			}
+		} else throw new TeacherNotLoggedException();
+	}
+		
+	// Obtiene las soluciones del curso/tarea accedidos actualmente
+	public void getSolutionsDB(String task_id, String course_id) throws TeacherNotLoggedException, StudentNotLoggedException {
+		if (contextPrepared(false)) {
+			try {
+				server.getSolutionsDB(task_id, course_id);
+			} catch (ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						my_console.setColor(new Color(null, new RGB(255,0,0)));
+						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+					}
+				});
+			}
+		} else throw new TeacherNotLoggedException();
 	}
 	
 	// Obtiene los estudiantes del curso/tarea accedidos actualmente
-	public void getStudentsDB(String course_id) throws UserNotLoggedException {
-		if (this.server.getActiveProfesor()!=null) {
+	public void getStudentsDB(String course_id) throws TeacherNotLoggedException, StudentNotLoggedException {
+		if (contextPrepared(false)) {
 			try {
-				this.server.getStudentsDB(course_id);
+				server.getStudentsDB(course_id);
 			} catch (ClassNotFoundException | SQLException e) {
 				e.printStackTrace();
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						my_console.setColor(new Color(null, new RGB(255,0,0)));
+						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+					}
+				});
 			}
-		} else throw new UserNotLoggedException();
+		} else throw new TeacherNotLoggedException();
 	}
 	
 	/**
 	 * Comprobaciones de seguridad
 	 */
+	// Comprueba que se ha accedido desde moodle y el contexto está preparado para realizar acciones
+	public boolean contextPrepared(boolean isStudent) throws StudentNotLoggedException, TeacherNotLoggedException {
+		if (isStudent) {
+			if(!studentIsLogged() || server.getActiveTask()==null || server.getActiveCourse()==null) {
+				throw new StudentNotLoggedException();
+			}
+		} else {
+			if (!teacherIsLogged() || server.getActiveTask()==null	|| server.getActiveCourse()==null) {
+				throw new TeacherNotLoggedException();
+			}
+		}
+		return true;
+	}
+		
 	// Comprueba que un estudiante esta correctamente logeado en una sesion
-	private boolean studentIsLogged() throws UserNotLoggedException {
+	private boolean studentIsLogged() {
 		boolean isLogged = false;
-		
-		if (this.server.getActiveStudent() != null && this.server.getActiveTask() != null
-				&& this.server.getActiveCourse() != null) {
+		if (server.getActiveStudent()!=null)
 			isLogged = true;
-		} else throw new UserNotLoggedException();
-		
 		return isLogged;
 	}
 	
 	// Comprueba que un profesor esta correctamente logeado en una sesion
-	public boolean profesorIsLogged() throws UserNotLoggedException {
+	private boolean teacherIsLogged() {
 		boolean isLogged = false;
-		
-		if (this.server.getActiveProfesor() != null) {
+		if (server.getActiveTeacher()!=null)
 			isLogged = true;
-		} else throw new UserNotLoggedException();
-		
 		return isLogged;
 	}
-	
-	// Previas comprobaciones se permite rescatar las ids para enviar una solucion
-	public String[] getIDs() throws UserNotLoggedException {
+		
+	// Previas comprobaciones se permite rescatar el contexto de la tarea
+	public String[] getContext() throws StudentNotLoggedException, TeacherNotLoggedException, UserNotLoggedException {
 		String[] ids = new String[3];
 		
-		if (studentIsLogged()) {
-			ids[0] = this.server.getActiveStudent().getID();
-			ids[1] = this.server.getActiveTask().getID();
-			ids[2] = this.server.getActiveCourse().getID();
+		if (contextPrepared(true)) {
+			ids[0] = server.getActiveStudent().getID();
+			ids[1] = server.getActiveTask().getID();
+			ids[2] = server.getActiveCourse().getID();
 		} else throw new UserNotLoggedException(); 
 		
 		return ids;
@@ -324,12 +416,12 @@ public class Proxy {
 	}
 	
 	// Comprobaciones relacionadas con las credenciales del usuario y las preferencias en Eclipse
-	public void checkUser(String email, String role) throws NotProfesorException, NotStudentException, GenericErrorException {
+	public void checkUser(String email, String role) throws NotProfesorException, NotStudentException, GenericErrorException, EmailErrorException {
 		String eclipse_userID = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_id"); // ID de las preferencias en Eclipse
 		String eclipse_userRole = MeltiPlugin.getDefault().getPreferenceStore().getString("melti_role"); // Rol de las preferencias en Eclipse
 	
 		if (!email.equals(eclipse_userID)) { // No coinciden el usuario de Moodle y Eclipse
-			throw new GenericErrorException();
+			throw new EmailErrorException();
 		}
 		
 		if (role.equals("Instructor")) {
@@ -367,11 +459,10 @@ public class Proxy {
 		out.println("</center>");
 		out.println("</body>");
 		out.println("</html>");
-		final MessageConsoleStream my_console = MeltiConsole.getMessageConsoleStream("Console");
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
-				my_console.setColor(new Color(null, new RGB(0,196,0)));
-				my_console.println("["+new Date().toString()+"] La tarea ha sido descargada con éxito.");
+				my_console.setColor(new Color(null, new RGB(0,204,0)));
+				my_console.println("["+new Date().toString()+"] OK: La tarea ha sido descargada con éxito.");
 			}
 		});
 	}

@@ -37,7 +37,7 @@ public abstract class User {
 	}
 	
 	public String getCourseID() {
-		return this.course_id;
+		return course_id;
 	}
 	
 }

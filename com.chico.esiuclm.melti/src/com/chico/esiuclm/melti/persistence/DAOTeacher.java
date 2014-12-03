@@ -10,7 +10,7 @@ import com.chico.esiuclm.melti.model.MeltiServer;
 import com.chico.esiuclm.melti.model.Solution;
 import com.chico.esiuclm.melti.model.Student;
 
-public class DAOProfesor {
+public class DAOTeacher {
 	
 	// Recoge las soluciones del curso/tarea activos
 	public static void getSolutionsDB(String task_id, String course_id) throws ClassNotFoundException, SQLException {
@@ -49,6 +49,20 @@ public class DAOProfesor {
 		
 		MeltiServer.get().getActiveCourse().setCourseStudents(students); // Los guardamos en el curso activo
 		db.close();
+	}
+
+	public static void addQualificationDB(Solution solution) throws SQLException, ClassNotFoundException {
+		Broker broker = Broker.get();
+		Connection db = broker.getDB();
+		CallableStatement cs = db.prepareCall("{call updateSolution(?,?,?,?,?,?)}");
+		cs.setString(1, solution.getStudentID());
+		cs.setString(2, solution.getTaskID());
+		cs.setString(3, solution.getCourseID());
+		cs.setString(4, solution.getSvdCode());
+		cs.setDouble(5, solution.getCalification());
+		cs.setString(6, solution.getCComment());
+		cs.executeUpdate();
+		db.close();				
 	}
 	
 }

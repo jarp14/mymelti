@@ -3,6 +3,7 @@ package com.chico.esiuclm.melti.model;
 import java.sql.SQLException;
 
 import com.chico.esiuclm.melti.persistence.DAOStudent;
+import com.chico.esiuclm.melti.persistence.DAOTeacher;
 
 public class Solution {
 	private String user_id, task_id, course_id;
@@ -54,6 +55,10 @@ public class Solution {
 
 	public void add() throws ClassNotFoundException, SQLException {
 		DAOStudent.addSolutionDB(this);
+	}
+
+	public void addQualification() throws ClassNotFoundException, SQLException {
+		DAOTeacher.addQualificationDB(this);		
 	}
 	
 }

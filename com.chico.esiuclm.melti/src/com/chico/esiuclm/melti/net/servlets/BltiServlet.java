@@ -16,12 +16,12 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.console.MessageConsoleStream;
 
+import com.chico.esiuclm.melti.exceptions.EmailErrorException;
 import com.chico.esiuclm.melti.exceptions.GenericErrorException;
 import com.chico.esiuclm.melti.exceptions.NotCodeException;
 import com.chico.esiuclm.melti.exceptions.NotProfesorException;
 import com.chico.esiuclm.melti.exceptions.NotStatementException;
 import com.chico.esiuclm.melti.exceptions.NotStudentException;
-import com.chico.esiuclm.melti.gui.Controller;
 import com.chico.esiuclm.melti.gui.console.MeltiConsole;
 import com.chico.esiuclm.melti.net.Proxy;
 import com.chico.esiuclm.melti.net.oauth.OAuthException;
@@ -41,6 +41,8 @@ public class BltiServlet extends HttpServlet {
 
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		final MessageConsoleStream my_console = MeltiConsole.getMessageConsoleStream("Console");
+		
 		// Informacion de la tarea enviada desde Moodle
 		final String task_id = request.getParameter("resource_link_id"); // ID de la tarea
 		final String task_title = request.getParameter("resource_link_title"); // Titulo de la tarea
@@ -71,7 +73,7 @@ public class BltiServlet extends HttpServlet {
 			Proxy.get().checkOauthCredentials(request); // Comprueba las claves mediante OAuth
 			Proxy.get().checkUser(user_email, user_role); // Comprueba credenciales del usuario y las preferencias en Eclipse
 		} catch (OAuthException | URISyntaxException | 
-				NotProfesorException | NotStudentException | GenericErrorException e1) {
+				NotProfesorException | NotStudentException | GenericErrorException | EmailErrorException e1) {
 			doError(request, response, 0);
 			return;
 		}
@@ -81,7 +83,7 @@ public class BltiServlet extends HttpServlet {
 		String task_code;
 		try {
 			task_statement = Proxy.get().acquireStatement(task_statement_code); // Adquiere el enunciado (no puede ser nulo) de la tarea
-			task_code = Proxy.get().acquireCode(task_statement_code); // Adquiere el codigo de la tarea (puede serlo aunque avisa en caso de error)
+			task_code = Proxy.get().acquireCode(task_statement_code); // Adquiere el codigo de la tarea (puede ser nulo aunque avisa en caso de error)
 		} catch (NotStatementException e3) {
 			doError(request, response, 1);
 			return;
@@ -97,27 +99,30 @@ public class BltiServlet extends HttpServlet {
 		 * Tras las comprobaciones exitosas...
 		 * Generacion de objetos para su manipulacion en la sesion
 		 */
-		// Recogemos la consola para los errores
-		final MessageConsoleStream my_console = MeltiConsole.getMessageConsoleStream("Console");
-		String tclass_name = Proxy.get().checkFileName(task_class_name);
-		Proxy.get().addCourseToDB(course_id, course_title, course_label); // Agregamos el curso a la BBDD si aun no esta
-		Proxy.get().addTaskToDB(task_id, task_title, tclass_name, task_statement, task_code, course_id); // Agregamos la tarea a la BBDD si aun no esta
+		// Agregamos el curso a la BBDD si aun no esta
+		Proxy.get().addCourseToDB(course_id, course_title, course_label);
+		// Agregamos la tarea a la BBDD si aun no esta
+		Proxy.get().addTaskToDB(task_id, task_title, Proxy.get().checkFileName(task_class_name), task_statement, task_code, course_id);
+		// Envia la llamada para actualizar la vista enunciado
+		Proxy.get().updateTaskView(task_statement); 
 		
-		if (user_role.equals("Instructor")) { // Si el cliente es un Profesor
-			Proxy.get().setActiveProfesor(user_id, user_firstName, user_lastName, user_email, null, course_id);
-			Controller.get().updateSolutionsView(task_id, course_id); // Recibe las soluciones de ese contexto, actualiza la vista
-		}
-		else if (user_role.equals("Learner")) { // Si el cliente es un Estudiante
+		// Si el cliente es un Profesor
+		if (user_role.equals("Instructor")) { 
+			Proxy.get().setActiveTeacher(user_id, user_firstName, user_lastName, user_email, null, course_id);
+			Proxy.get().updateSolutionsView(task_id, course_id); // Recibe las soluciones de ese contexto, actualiza la vista
+		} // Si el cliente es un Estudiante
+		else if (user_role.equals("Learner")) { 
 			// Lo anadimos a la BD si no esta todavia
 			Proxy.get().addStudentToDB(user_id, user_firstName, user_lastName, user_email, user_role, course_id);
+			Proxy.get().updateStudentTasksView(task_id, course_id);
 			try { // Creamos proyecto Java con la tarea
 				if (Proxy.get().createProject(task_title, user_firstName+user_lastName, task_code, 
-						tclass_name, false)) {
+						Proxy.get().checkFileName(task_class_name), false)) {
 					Display.getDefault().syncExec(new Runnable() {
 						public void run() {
-							my_console.setColor(new Color(null, new RGB(205,205,0)));
-							my_console.println("["+new Date().toString()+"] El proyecto "+task_title+"_"+user_firstName+user_lastName
-									+" ya se encuentra en el espacio de trabajo.\nNo ha sido sobreescrito por seguridad.");
+							my_console.setColor(new Color(null, new RGB(204,204,0)));
+							my_console.println("["+new Date().toString()+"] WARNING: El proyecto "+task_title+"_"+user_firstName+user_lastName
+									+" ya se encuentra en el espacio de trabajo\nNo ha sido sobreescrito por seguridad");
 						}
 					});
 					
@@ -126,13 +131,11 @@ public class BltiServlet extends HttpServlet {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						my_console.setColor(new Color(null, new RGB(255,0,0)));
-						my_console.println("["+new Date().toString()+"] Se produjo un error inesperado al generar el proyecto Java.");
+						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error inesperado al generar el proyecto Java");
 					}
 				});
 			}
 		}
-		
-		Controller.get().updateTaskForView(task_statement); // Envia la llamada para actualizar la vista enunciado
 	}
 	
 	public void doError(HttpServletRequest request, HttpServletResponse response, int errorkey) throws IOException {
@@ -153,7 +156,7 @@ public class BltiServlet extends HttpServlet {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						my_console.setColor(new Color(null, new RGB(255,0,0)));
-						my_console.println("["+new Date().toString()+"] Validación de credenciales incorrecta.\nAsegúrese que sus datos sean idénticos a los de Moodle.");
+						my_console.println("["+new Date().toString()+"] ERROR: Validación de credenciales incorrecta\nAsegúrese que sus datos sean idénticos a los de Moodle");
 					}
 				});
 				break;
@@ -167,7 +170,7 @@ public class BltiServlet extends HttpServlet {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						my_console.setColor(new Color(null, new RGB(255,0,0)));
-						my_console.println("["+new Date().toString()+"] No se encuentra el enuciado de la tarea.\nContacte con su profesor.");
+						my_console.println("["+new Date().toString()+"] ERROR: No se encuentra el enuciado de la tarea\nContacte con su profesor");
 					}
 				});				
 				break;

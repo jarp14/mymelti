@@ -76,7 +76,7 @@
             commandId="com.chico.esiuclm.melti.commands.evaluate">
       </handler>
       <handler
-            class="com.chico.esiuclm.melti.handlers.Qualify"
+            class="com.chico.esiuclm.melti.handlers.QualifySolution"
             commandId="com.chico.esiuclm.melti.commands.qualify">
       </handler>
    </extension>
@@ -184,16 +184,24 @@
             name="Soluciones"
             restorable="true">
       </view>
+      <view
+            category="com.chico.esiuclm.melti"
+            class="com.chico.esiuclm.melti.gui.views.MyTasksView"
+            icon="icons/mytasks.png"
+            id="com.chico.esiuclm.melti.views.mytasksView"
+            name="Mis Tareas"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            class="com.chico.esiuclm.melti.perspectives.StudentPerspective"
+            class="com.chico.esiuclm.melti.perspectives.StudentPerspectiveFactory"
             id="com.chico.esiuclm.melti.perspective1"
             name="Alumnos">
       </perspective>
       <perspective
-            class="com.chico.esiuclm.melti.perspectives.TeacherPerspective"
+            class="com.chico.esiuclm.melti.perspectives.TeacherPerspectiveFactory"
             id="com.chico.esiuclm.melti.perspective2"
             name="Profesores">
       </perspective>

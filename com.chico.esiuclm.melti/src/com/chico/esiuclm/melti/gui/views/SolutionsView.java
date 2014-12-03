@@ -32,13 +32,14 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.IServiceLocator;
 
 import com.chico.esiuclm.melti.gui.Controller;
-import com.chico.esiuclm.melti.gui.WrappedSolution;
 
 public class SolutionsView extends ViewPart {
 
 	public static final String ID = "com.chico.esiuclm.melti.views.solutionsView";
 	private TableViewer viewer;
 	private Action seeSolutionAction, qualifyAction;
+	// TODO private Action deleteCourse;
+	// TODO refrescar la vista
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -193,8 +194,7 @@ public class SolutionsView extends ViewPart {
 	private void executeCommand(String the_command) {
 		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 		if (selection.isEmpty()) return;
-		WrappedSolution a = (WrappedSolution) selection.getFirstElement();
-		Controller.get().setActiveWrappedSolution(a);
+		Controller.get().setActiveWrappedSolution((WrappedSolution) selection.getFirstElement()); // Obtenemos los valores para trabajar con ellos
 		IServiceLocator serviceLocator = PlatformUI.getWorkbench();
 		ICommandService commandService = (ICommandService) serviceLocator.getService(ICommandService.class);
 		Command command = commandService.getCommand(the_command);
@@ -214,7 +214,6 @@ public class SolutionsView extends ViewPart {
 	/*private void createToolbar() {
 		IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
 		mgr.add(selectAllAction);
-	
 	}*/
 
 }

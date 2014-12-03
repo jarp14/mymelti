@@ -1,4 +1,4 @@
-package com.chico.esiuclm.melti.gui.dialog;
+package com.chico.esiuclm.melti.gui.dialogs;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -48,10 +48,8 @@ public class QualifyDialog extends Dialog {
 		
 		label = new Label(container, SWT.LEFT);
 		label.setText("Selecciona un fichero: ");
-		
 		input_file = new Text(container, SWT.SINGLE | SWT.BORDER);
 		input_file.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
 		browse_button = new Button(container, SWT.PUSH);
 		browse_button.setText("Buscar...");
 		browse_button.setToolTipText("Selecciona el fichero comentado");
@@ -87,7 +85,6 @@ public class QualifyDialog extends Dialog {
 		
 		label = new Label(container, SWT.LEFT);
 		label.setText("Calificación: ");
-		
 		input_grade = new Text(container, SWT.SINGLE | SWT.BORDER);
 		input_grade.setToolTipText("Ingresa un valor entre 0 y 10");
 		new Label(container, SWT.NONE);
@@ -95,7 +92,6 @@ public class QualifyDialog extends Dialog {
 		label = new Label(container, SWT.TOP);
 		label.setText("Comentarios: ");
 		label.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		
 		input_text = new Text(container, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
 		input_text.setLayoutData(new GridData(GridData.FILL_BOTH));
 		input_text.setToolTipText("Ingresa comentarios sobre el ejercicio resuelto");

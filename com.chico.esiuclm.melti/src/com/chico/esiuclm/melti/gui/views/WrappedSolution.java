@@ -1,4 +1,4 @@
-package com.chico.esiuclm.melti.gui;
+package com.chico.esiuclm.melti.gui.views;
 
 import com.chico.esiuclm.melti.model.Solution;
 

@@ -2,7 +2,10 @@ package com.chico.esiuclm.melti.gui;
 
 import java.util.ArrayList;
 
+import com.chico.esiuclm.melti.exceptions.StudentNotLoggedException;
+import com.chico.esiuclm.melti.exceptions.TeacherNotLoggedException;
 import com.chico.esiuclm.melti.exceptions.UserNotLoggedException;
+import com.chico.esiuclm.melti.gui.views.WrappedSolution;
 import com.chico.esiuclm.melti.model.Course;
 import com.chico.esiuclm.melti.model.MeltiServer;
 import com.chico.esiuclm.melti.model.Solution;
@@ -28,29 +31,19 @@ public class Controller {
 		return yo;
 	}
 	
-	public Task getActiveTask() {
-		return this.active_task;
+	// Actualia la vista Enunciado con el enunciado de la tarea activa
+	public void updateTaskView(String task_statement) { // Realiza la llamada a la vista para refrescar
+		active_task.setStatement(task_statement);
 	}
 
-	public ArrayList<WrappedSolution> getWrappedSolutions() {
-		return wrapped_solutions;
-	}
-	
-	public void updateTaskForView(String task_statement) { // Envia la llamada a la vista para refrescar
-		this.active_task.setStatement(task_statement);
-	}
-
+	// Actualiza la vista soluciones con las soluciones de un contexto curso/tarea
 	public void updateSolutionsView(String task_id, String course_id) {
-		prepareSolutionsView(task_id, course_id);
-	}
-	
-	private void prepareSolutionsView(String task_id, String course_id) {
 		try {
 			Proxy.get().getSolutionsDB(task_id, course_id); // Recoge las soluciones de ese contexto de la BBDD
 			Proxy.get().getStudentsDB(course_id); // Recoge los estudiantes de ese contexto de la BBDD
-		} catch (UserNotLoggedException e) {
+		} catch (TeacherNotLoggedException | StudentNotLoggedException e) {
 			e.printStackTrace();
-		}
+		} 
 		
 		Course course = MeltiServer.get().getActiveCourse(); // Recoge la informacion del curso
 		Task task = MeltiServer.get().getActiveTask(); // Recoge la informacion de la tarea
@@ -65,7 +58,7 @@ public class Controller {
 				if (solutions.get(i).getStudentID().equals(course_students.get(j).getID())) {
 					st = course_students.get(j);
 					aux = new WrappedSolution(solutions.get(i),
-							course.getTitle(), 
+							course.getTitle(),
 							task.getTitle(),
 							task.getTaskClassName(),
 							st.getFirst_name()+" "+st.getLast_name(), 
@@ -76,12 +69,21 @@ public class Controller {
 		}
 		wrapped_solutions = wsolutions; // Actualizamos la informacion a mostrar en la vista
 	}
-
+	
+	/**
+	 * Getters Setters
+	 */
+	public Task getActiveTask() {
+		return active_task;
+	}
+	public ArrayList<WrappedSolution> getWrappedSolutions() {
+		return wrapped_solutions;
+	}
 	public WrappedSolution getActiveWrappedSolution() {
-		return this.active_wsolution;
+		return active_wsolution;
 	}
 	public void setActiveWrappedSolution(WrappedSolution ws) {
-		this.active_wsolution = ws;
+		active_wsolution = ws;
 	}
 	
 }
