@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +30,10 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.console.MessageConsoleStream;
 
 import com.chico.esiuclm.melti.MeltiPlugin;
 import com.chico.esiuclm.melti.exceptions.GenericErrorException;
@@ -37,6 +42,7 @@ import com.chico.esiuclm.melti.exceptions.NotProfesorException;
 import com.chico.esiuclm.melti.exceptions.NotStatementException;
 import com.chico.esiuclm.melti.exceptions.NotStudentException;
 import com.chico.esiuclm.melti.exceptions.UserNotLoggedException;
+import com.chico.esiuclm.melti.gui.console.MeltiConsole;
 import com.chico.esiuclm.melti.model.Course;
 import com.chico.esiuclm.melti.model.MeltiServer;
 import com.chico.esiuclm.melti.model.Profesor;
@@ -361,6 +367,13 @@ public class Proxy {
 		out.println("</center>");
 		out.println("</body>");
 		out.println("</html>");
+		final MessageConsoleStream my_console = MeltiConsole.getMessageConsoleStream("Console");
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				my_console.setColor(new Color(null, new RGB(0,196,0)));
+				my_console.println("["+new Date().toString()+"] La tarea ha sido descargada con éxito.");
+			}
+		});
 	}
 	
 }

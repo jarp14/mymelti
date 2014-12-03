@@ -3,6 +3,7 @@ package com.chico.esiuclm.melti.net.servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
+import java.util.Date;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -10,12 +11,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.console.MessageConsoleStream;
+
 import com.chico.esiuclm.melti.exceptions.GenericErrorException;
 import com.chico.esiuclm.melti.exceptions.NotCodeException;
 import com.chico.esiuclm.melti.exceptions.NotProfesorException;
 import com.chico.esiuclm.melti.exceptions.NotStatementException;
 import com.chico.esiuclm.melti.exceptions.NotStudentException;
 import com.chico.esiuclm.melti.gui.Controller;
+import com.chico.esiuclm.melti.gui.console.MeltiConsole;
 import com.chico.esiuclm.melti.net.Proxy;
 import com.chico.esiuclm.melti.net.oauth.OAuthException;
 
@@ -33,24 +40,24 @@ public class BltiServlet extends HttpServlet {
 	}
 
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {			
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// Informacion de la tarea enviada desde Moodle
-		String task_id = request.getParameter("resource_link_id"); // ID de la tarea
-		String task_title = request.getParameter("resource_link_title"); // Titulo de la tarea
-		String task_statement_code = request.getParameter("resource_link_description"); // Enunciado y codigo
-		String task_class_name = request.getParameter("custom_nombre"); // Nombre de la clase
+		final String task_id = request.getParameter("resource_link_id"); // ID de la tarea
+		final String task_title = request.getParameter("resource_link_title"); // Titulo de la tarea
+		final String task_statement_code = request.getParameter("resource_link_description"); // Enunciado y codigo
+		final String task_class_name = request.getParameter("custom_nombre"); // Nombre de la clase
 		
 		// Informacion del usuario enviada desde Moodle
-		String user_id = request.getParameter("user_id"); // ID unico del usuario
-		String user_role = request.getParameter("roles"); // Rol del usuario usando el sistema
-		String user_email = request.getParameter("lis_person_contact_email_primary"); // E-mail del usuario
-		String user_firstName = request.getParameter("lis_person_name_given"); // Nombre del usuario
-		String user_lastName = request.getParameter("lis_person_name_family"); // Apellidos del usuario
+		final String user_id = request.getParameter("user_id"); // ID unico del usuario
+		final String user_role = request.getParameter("roles"); // Rol del usuario usando el sistema
+		final String user_email = request.getParameter("lis_person_contact_email_primary"); // E-mail del usuario
+		final String user_firstName = request.getParameter("lis_person_name_given"); // Nombre del usuario
+		final String user_lastName = request.getParameter("lis_person_name_family"); // Apellidos del usuario
 		
 		// Informacion del curso enviada desde Moodle
-		String course_id = request.getParameter("context_id"); // ID del curso
-		String course_title = request.getParameter("context_title"); // Titulo del curso
-		String course_label = request.getParameter("context_label"); // Etiqueta del curso
+		final String course_id = request.getParameter("context_id"); // ID del curso
+		final String course_title = request.getParameter("context_title"); // Titulo del curso
+		final String course_label = request.getParameter("context_label"); // Etiqueta del curso
 		
 		// Informacion para posible retorno y calificaciones
 		//String service_url = request.getParameter("lis_outcome_service_url"); // Direccion de retorno
@@ -65,7 +72,6 @@ public class BltiServlet extends HttpServlet {
 			Proxy.get().checkUser(user_email, user_role); // Comprueba credenciales del usuario y las preferencias en Eclipse
 		} catch (OAuthException | URISyntaxException | 
 				NotProfesorException | NotStudentException | GenericErrorException e1) {
-			e1.printStackTrace();
 			doError(request, response, 0);
 			return;
 		}
@@ -77,11 +83,9 @@ public class BltiServlet extends HttpServlet {
 			task_statement = Proxy.get().acquireStatement(task_statement_code); // Adquiere el enunciado (no puede ser nulo) de la tarea
 			task_code = Proxy.get().acquireCode(task_statement_code); // Adquiere el codigo de la tarea (puede serlo aunque avisa en caso de error)
 		} catch (NotStatementException e3) {
-			e3.printStackTrace();
 			doError(request, response, 1);
 			return;
 		} catch (NotCodeException e4) {
-			e4.printStackTrace();
 			doError(request, response, 2);
 			return;
 		}
@@ -93,6 +97,8 @@ public class BltiServlet extends HttpServlet {
 		 * Tras las comprobaciones exitosas...
 		 * Generacion de objetos para su manipulacion en la sesion
 		 */
+		// Recogemos la consola para los errores
+		final MessageConsoleStream my_console = MeltiConsole.getMessageConsoleStream("Console");
 		String tclass_name = Proxy.get().checkFileName(task_class_name);
 		Proxy.get().addCourseToDB(course_id, course_title, course_label); // Agregamos el curso a la BBDD si aun no esta
 		Proxy.get().addTaskToDB(task_id, task_title, tclass_name, task_statement, task_code, course_id); // Agregamos la tarea a la BBDD si aun no esta
@@ -105,10 +111,24 @@ public class BltiServlet extends HttpServlet {
 			// Lo anadimos a la BD si no esta todavia
 			Proxy.get().addStudentToDB(user_id, user_firstName, user_lastName, user_email, user_role, course_id);
 			try { // Creamos proyecto Java con la tarea
-				boolean projectExists = Proxy.get().createProject(task_title, user_firstName+user_lastName, task_code, 
-						tclass_name, false);
+				if (Proxy.get().createProject(task_title, user_firstName+user_lastName, task_code, 
+						tclass_name, false)) {
+					Display.getDefault().syncExec(new Runnable() {
+						public void run() {
+							my_console.setColor(new Color(null, new RGB(205,205,0)));
+							my_console.println("["+new Date().toString()+"] El proyecto "+task_title+"_"+user_firstName+user_lastName
+									+" ya se encuentra en el espacio de trabajo.\nNo ha sido sobreescrito por seguridad.");
+						}
+					});
+					
+				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						my_console.setColor(new Color(null, new RGB(255,0,0)));
+						my_console.println("["+new Date().toString()+"] Se produjo un error inesperado al generar el proyecto Java.");
+					}
+				});
 			}
 		}
 		
@@ -116,6 +136,7 @@ public class BltiServlet extends HttpServlet {
 	}
 	
 	public void doError(HttpServletRequest request, HttpServletResponse response, int errorkey) throws IOException {
+		final MessageConsoleStream my_console = MeltiConsole.getMessageConsoleStream("Console");
 		response.setContentType("text/html");
 		PrintWriter out = response.getWriter();
 		out.println("<html>");
@@ -129,6 +150,12 @@ public class BltiServlet extends HttpServlet {
 				out.println("</center>");
 				out.println("</body>");
 				out.println("</html>");
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						my_console.setColor(new Color(null, new RGB(255,0,0)));
+						my_console.println("["+new Date().toString()+"] Validación de credenciales incorrecta.\nAsegúrese que sus datos sean idénticos a los de Moodle.");
+					}
+				});
 				break;
 			case 1:
 				out.println("<h1>Error inesperado</h1>\n");
@@ -137,6 +164,12 @@ public class BltiServlet extends HttpServlet {
 				out.println("</center>");
 				out.println("</body>");
 				out.println("</html>");
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						my_console.setColor(new Color(null, new RGB(255,0,0)));
+						my_console.println("["+new Date().toString()+"] No se encuentra el enuciado de la tarea.\nContacte con su profesor.");
+					}
+				});				
 				break;
 				
 			case 2: 

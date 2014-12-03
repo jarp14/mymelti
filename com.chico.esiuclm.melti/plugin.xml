@@ -185,6 +185,19 @@
             restorable="true">
       </view>
    </extension>
+   <extension
+         point="org.eclipse.ui.perspectives">
+      <perspective
+            class="com.chico.esiuclm.melti.perspectives.StudentPerspective"
+            id="com.chico.esiuclm.melti.perspective1"
+            name="Alumnos">
+      </perspective>
+      <perspective
+            class="com.chico.esiuclm.melti.perspectives.TeacherPerspective"
+            id="com.chico.esiuclm.melti.perspective2"
+            name="Profesores">
+      </perspective>
+   </extension>
    
 
 </plugin>
