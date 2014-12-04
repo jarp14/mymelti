@@ -8,9 +8,9 @@ import com.chico.esiuclm.melti.persistence.DAOCourse;
 public class Course {
 
 	private String id, title, label;
-	private ArrayList<Task> the_tasks;
-	private ArrayList<Student> the_students;
-	private ArrayList<Solution> the_solutions;
+	private ArrayList<Task> the_tasks; // Las tareas del curso
+	private ArrayList<Student> the_students; // El listado de alumnos del curso
+	private ArrayList<Solution> the_solutions; // Guarda las resoluciones del curso
 	
 	public Course(String id, String title, String label) {
 		this.id = id;
@@ -19,45 +19,34 @@ public class Course {
 	}
 	
 	public String getID() {
-		return this.id;
+		return id;
 	}
-	
 	public String getTitle() {
-		return this.title;
+		return title;
 	}
-	
 	public String getLabel() {
-		return this.label;
+		return label;
 	}
-	
-	public ArrayList<Task> getCourseTasks() {
-		if(the_tasks == null)
-			the_tasks = new ArrayList<Task>();
-		return this.the_tasks;
-	}
-	
-	public void setCourseTasks(ArrayList<Task> tasks) {
-		this.the_tasks = tasks;
-	}
-	
 	public ArrayList<Student> getCourseStudents() {
-		if(the_students == null)
+		if (the_students == null)
 			the_students = new ArrayList<Student>();
-		return this.the_students;
+		return the_students;
 	}
-	
 	public void setCourseStudents(ArrayList<Student> students) {
-		this.the_students = students;
+		the_students = students;
 	}
-	
 	public ArrayList<Solution> getCourseSolutions() {
-		if(the_solutions == null)
+		if (the_solutions == null)
 			the_solutions = new ArrayList<Solution>();
-		return this.the_solutions;
+		return the_solutions;
 	}
-	
 	public void setCourseSolutions(ArrayList<Solution> solutions) {
-		this.the_solutions = solutions;
+		the_solutions = solutions;
+	}
+	public ArrayList<Task> getCourseTasks() {
+		if (the_tasks == null)
+			the_tasks = new ArrayList<Task>();
+		return the_tasks;
 	}
 	
 	// Añade este curso a la BBDD

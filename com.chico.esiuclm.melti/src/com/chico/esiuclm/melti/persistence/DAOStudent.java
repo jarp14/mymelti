@@ -2,9 +2,12 @@ package com.chico.esiuclm.melti.persistence;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import com.chico.esiuclm.melti.exceptions.SolvedErrorException;
+import com.chico.esiuclm.melti.model.MeltiServer;
 import com.chico.esiuclm.melti.model.Solution;
 import com.chico.esiuclm.melti.model.Student;
 
@@ -48,6 +51,24 @@ public class DAOStudent {
 		cs.executeUpdate();
 		if (cs.getBoolean(4)) throw new SolvedErrorException(); //Si el usuario esta ya onLine
 		bd.close();
+	}
+
+	public static void getMySolutionsDB(String user_id) throws SQLException, ClassNotFoundException {
+		Broker broker = Broker.get();
+		Connection db = broker.getDB();
+		CallableStatement cs = db.prepareCall("{call getMySolutions(?)}");
+		cs.setString(1, user_id);
+		ResultSet rs = cs.executeQuery();
+		ArrayList<Solution> solutions = new ArrayList<Solution>();
+		
+		while(rs.next()) {
+			Solution aux = new Solution(user_id, rs.getString(1), rs.getString(2), 
+					rs.getString(3), rs.getDouble(4), rs.getString(5));
+			solutions.add(aux);
+		}
+		
+		MeltiServer.get().getActiveStudent().setMySolutions(solutions); // Las guardamos en el curso activo
+		db.close();
 	}
 	
 }

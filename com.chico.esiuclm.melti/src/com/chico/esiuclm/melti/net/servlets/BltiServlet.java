@@ -114,7 +114,7 @@ public class BltiServlet extends HttpServlet {
 		else if (user_role.equals("Learner")) { 
 			// Lo anadimos a la BD si no esta todavia
 			Proxy.get().addStudentToDB(user_id, user_firstName, user_lastName, user_email, user_role, course_id);
-			Proxy.get().updateStudentTasksView(task_id, course_id);
+			Proxy.get().updateStudentTasksView(user_id);
 			try { // Creamos proyecto Java con la tarea
 				if (Proxy.get().createProject(task_title, user_firstName+user_lastName, task_code, 
 						Proxy.get().checkFileName(task_class_name), false)) {

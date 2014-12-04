@@ -50,7 +50,8 @@ public class UploadDialog extends Dialog {
 		label = new Label(container, SWT.LEFT);
 		label.setText("Alumno: ");
 		label = new Label(container, SWT.BORDER);
-		label.setText(MeltiServer.get().getActiveStudent().getFirst_name()+":"+MeltiServer.get().getActiveStudent().getEmail());
+		label.setText(MeltiServer.get().getActiveStudent().getFirst_name()+
+				" ("+MeltiServer.get().getActiveStudent().getEmail()+") ");
 		new Label(container, SWT.NONE);
 		
 		label = new Label(container, SWT.LEFT);

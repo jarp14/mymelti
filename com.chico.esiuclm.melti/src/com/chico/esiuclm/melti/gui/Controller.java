@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import com.chico.esiuclm.melti.exceptions.StudentNotLoggedException;
 import com.chico.esiuclm.melti.exceptions.TeacherNotLoggedException;
-import com.chico.esiuclm.melti.exceptions.UserNotLoggedException;
 import com.chico.esiuclm.melti.gui.views.WrappedSolution;
 import com.chico.esiuclm.melti.model.Course;
 import com.chico.esiuclm.melti.model.MeltiServer;
@@ -16,7 +15,7 @@ import com.chico.esiuclm.melti.net.Proxy;
 public class Controller {
 	private static Controller yo;
 	private Task active_task; // Instancia de tarea mostrada en la vista StatementView
-	private ArrayList<WrappedSolution> wrapped_solutions; // Array con las soluciones para la vista SolutionsView
+	private ArrayList<WrappedSolution> wrapped_solutions; // Array con las soluciones para las vistas SolutionsView y MyTasksView
 	private WrappedSolution active_wsolution;
 	
 	public Controller() { // Valores iniciales
@@ -68,6 +67,32 @@ public class Controller {
 			}
 		}
 		wrapped_solutions = wsolutions; // Actualizamos la informacion a mostrar en la vista
+	}
+	
+	public void updateStudentTasksView(String user_id) {
+		try {
+			Proxy.get().getMySolutionsDB(user_id);
+		} catch (StudentNotLoggedException | TeacherNotLoggedException e) {
+			
+		}
+		
+		Course course = MeltiServer.get().getActiveCourse(); // Recoge la informacion del curso
+		Task task = MeltiServer.get().getActiveTask(); // Recoge la informacion de la tarea
+		Student student = MeltiServer.get().getActiveStudent();
+		ArrayList<Solution> solutions = MeltiServer.get().getActiveStudent().getMySolutions(); // Recoge las soluciones de esa alumno
+		
+		WrappedSolution aux;
+		ArrayList<WrappedSolution> wsolutions = new ArrayList<WrappedSolution>();
+		for(int i=0; i<solutions.size(); i++) {
+			aux = new WrappedSolution(solutions.get(i),
+					course.getTitle(),
+					task.getTitle(),
+					task.getTaskClassName(),
+					student.getFirst_name()+" "+student.getLast_name(),
+					student.getEmail());
+			wsolutions.add(aux);
+		}
+		wrapped_solutions = wsolutions;
 	}
 	
 	/**

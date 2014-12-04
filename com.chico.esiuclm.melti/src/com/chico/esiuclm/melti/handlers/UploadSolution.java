@@ -97,7 +97,8 @@ public class UploadSolution extends AbstractHandler {
 		
 		// Pide autorizar la subida de la tarea seleccionada al usuario
 		boolean result = MessageDialog.openConfirm(window.getShell(), "Confirmación de envío",
-			"Alumno: "+MeltiServer.get().getActiveStudent().getFirst_name()+":"+MeltiServer.get().getActiveStudent().getEmail()+
+			"Alumno: "+MeltiServer.get().getActiveStudent().getFirst_name()+
+						" ("+MeltiServer.get().getActiveStudent().getEmail()+") "+
 			"\nTarea a enviar: "+task_path+"\n\n"
 			+"¿Estás seguro de enviar esta tarea? No podrás modificar esta acción.");
 		if (result) { // OK

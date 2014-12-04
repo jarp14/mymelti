@@ -20,7 +20,7 @@ import com.chico.esiuclm.melti.gui.console.MeltiConsole;
 import com.chico.esiuclm.melti.gui.views.WrappedSolution;
 import com.chico.esiuclm.melti.net.Proxy;
 
-public class Evaluate extends AbstractHandler {
+public class SeeSolution extends AbstractHandler {
 
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {

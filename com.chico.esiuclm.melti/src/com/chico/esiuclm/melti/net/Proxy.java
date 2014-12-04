@@ -65,8 +65,9 @@ import com.chico.esiuclm.melti.net.servlets.BltiServlet;
 
 /**
  * Proxy encargado de realizar comprobaciones de seguridad
- * y creacion de objetos. Ahorro de recursos siempre que es
- * posible
+ * e instanciar objetos de una sesion con el plugin. Permite realizar llamadas
+ * a MeltiServer y comunicarse con la BBDD. También con Controller para 
+ * avisar a la interfaz
  */
 
 public class Proxy {
@@ -130,7 +131,7 @@ public class Proxy {
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					my_console.setColor(new Color(null, new RGB(255,0,0)));
-					my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+					my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti");
 				}
 			});
 		}
@@ -147,7 +148,7 @@ public class Proxy {
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					my_console.setColor(new Color(null, new RGB(255,0,0)));
-					my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+					my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti");
 				}
 			});
 		}
@@ -164,7 +165,7 @@ public class Proxy {
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					my_console.setColor(new Color(null, new RGB(255,0,0)));
-					my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+					my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti");
 				}
 			});
 		}
@@ -179,8 +180,8 @@ public class Proxy {
 	/**
 	 * Llamadas al controlador para actualizar vistas 
 	 */
-	public void updateStudentTasksView(String task_id, String course_id) {
-		
+	public void updateStudentTasksView(String user_id) {
+		controller.updateStudentTasksView(user_id);
 	}
 
 	public void updateTaskView(String task_statement) {
@@ -205,11 +206,27 @@ public class Proxy {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						my_console.setColor(new Color(null, new RGB(255,0,0)));
-						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti");
 					}
 				});
 			}
-		} else throw new StudentNotLoggedException();
+		} 
+	}
+	
+	public void getMySolutionsDB(String user_id) throws StudentNotLoggedException, TeacherNotLoggedException {
+		if(contextPrepared(true)) {
+			try {
+				server.getMySolutionsDB(user_id);
+			} catch (ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						my_console.setColor(new Color(null, new RGB(255,0,0)));
+						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti");
+					}
+				});
+			}
+		} 
 	}
 	
 	public void checkIfSolutionSolved(String[] task_context) throws ClassNotFoundException, SQLException, SolvedErrorException {
@@ -230,7 +247,7 @@ public class Proxy {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						my_console.setColor(new Color(null, new RGB(255,0,0)));
-						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti");
 					}
 				});
 			}
@@ -247,7 +264,7 @@ public class Proxy {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						my_console.setColor(new Color(null, new RGB(255,0,0)));
-						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti");
 					}
 				});
 			}
@@ -264,7 +281,7 @@ public class Proxy {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						my_console.setColor(new Color(null, new RGB(255,0,0)));
-						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti.");
+						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti");
 					}
 				});
 			}
@@ -277,11 +294,11 @@ public class Proxy {
 	// Comprueba que se ha accedido desde moodle y el contexto está preparado para realizar acciones
 	public boolean contextPrepared(boolean isStudent) throws StudentNotLoggedException, TeacherNotLoggedException {
 		if (isStudent) {
-			if(!studentIsLogged() || server.getActiveTask()==null || server.getActiveCourse()==null) {
+			if(!studentIsLogged() || server.getActiveCourse()==null) {
 				throw new StudentNotLoggedException();
 			}
 		} else {
-			if (!teacherIsLogged() || server.getActiveTask()==null	|| server.getActiveCourse()==null) {
+			if (!teacherIsLogged() || server.getActiveCourse()==null) {
 				throw new TeacherNotLoggedException();
 			}
 		}
@@ -373,7 +390,7 @@ public class Proxy {
 	public boolean createProject(String projectName, String combination, String fileCode, String fileName, 
 			boolean profesor) throws Exception {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-	    IProject project = root.getProject(projectName+"_"+combination); // Para asociarlo a un usuario
+	    IProject project = root.getProject(projectName.replace(" ","")+"_"+combination); // Para asociarlo a un usuario
 	    IJavaProject javaProject = null;
 	    IProgressMonitor progressMonitor = new NullProgressMonitor();
 	    
@@ -404,7 +421,7 @@ public class Proxy {
     	IPackageFragmentRoot srcFolder = javaProject.getPackageFragmentRoot(folder);
      
     	// Crear fragmento de paquete
-    	IPackageFragment fragment = srcFolder.createPackageFragment(projectName.toLowerCase(), true, progressMonitor);
+    	IPackageFragment fragment = srcFolder.createPackageFragment(projectName.toLowerCase().replace(" ",""), true, progressMonitor);
      
     	StringBuffer buffer = new StringBuffer();
     	if(!profesor) buffer.append("package "+fragment.getElementName()+";\n");
@@ -462,7 +479,7 @@ public class Proxy {
 		Display.getDefault().syncExec(new Runnable() {
 			public void run() {
 				my_console.setColor(new Color(null, new RGB(0,204,0)));
-				my_console.println("["+new Date().toString()+"] OK: La tarea ha sido descargada con éxito.");
+				my_console.println("["+new Date().toString()+"] OK: La tarea ha sido descargada con éxito");
 			}
 		});
 	}

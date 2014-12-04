@@ -33,12 +33,11 @@ import org.eclipse.ui.services.IServiceLocator;
 
 import com.chico.esiuclm.melti.gui.Controller;
 
-public class SolutionsView extends ViewPart {
+public class MyTasksView extends ViewPart {
 
-	public static final String ID = "com.chico.esiuclm.melti.views.solutionsView";
+	public static final String ID = "com.chico.esiuclm.melti.views.mytasksView";
 	private TableViewer viewer;
-	private Action seeSolutionAction, qualifyAction;
-	// TODO private Action deleteCourse;
+	private Action seeQualificationAction;
 	// TODO refrescar la vista
 	
 	@Override
@@ -57,20 +56,6 @@ public class SolutionsView extends ViewPart {
 		cTaskTitle.setText("Tarea");
 		cTaskTitle.setResizable(true);
 		cTaskTitle.setMoveable(true);
-		
-		TableViewerColumn tvc2 = new TableViewerColumn(viewer, SWT.NONE);
-		TableColumn cName = tvc2.getColumn();
-		layout.setColumnData(cName, new ColumnWeightData(6, ColumnWeightData.MINIMUM_WIDTH, true));
-		cName.setText("Alumno");
-		cName.setResizable(true);
-		cName.setMoveable(true);
-
-		TableViewerColumn tvc3 = new TableViewerColumn(viewer, SWT.NONE);
-		TableColumn cEmail = tvc3.getColumn();
-		layout.setColumnData(cEmail, new ColumnWeightData(6, ColumnWeightData.MINIMUM_WIDTH, true));
-		cEmail.setText("E-mail");
-		cEmail.setResizable(true);
-		cEmail.setMoveable(true);
 
 		TableViewerColumn tvc4 = new TableViewerColumn(viewer, SWT.NONE);
 		TableColumn cCourse = tvc4.getColumn();
@@ -111,15 +96,9 @@ public class SolutionsView extends ViewPart {
 				result = ws.getTask_title();
 				break;
 			case 1:
-				result = ws.getStudent_name_family();
-				break;
-			case 2:
-				result = ws.getStudent_email();
-				break;
-			case 3:
 				result = ws.getCourse_title();
 				break;
-			case 4:
+			case 2:
 				if(ws.getCalification()==-1.0) result = "No calificado";
 				else result = ws.getCalification()+"";
 				break;
@@ -141,15 +120,9 @@ public class SolutionsView extends ViewPart {
 	}
 		
 	public void createActions() {
-		seeSolutionAction = new Action("Ver solución") {
+		seeQualificationAction = new Action("Ver calificación") {
 			public void run() {
-				seeSolution();
-			}
-		};
-		
-		qualifyAction = new Action("Calificar") {
-			public void run() {
-				qualifySolution();
+				seeQualification();
 			}
 		};
 	}
@@ -173,22 +146,17 @@ public class SolutionsView extends ViewPart {
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
-				seeSolution();
+				seeQualification();
 			}	
 		});
 	}
 	
 	private void fillContextMenu(IMenuManager mgr) {
-		mgr.add(seeSolutionAction);
-		mgr.add(qualifyAction);
+		mgr.add(seeQualificationAction);
 	}
 	
-	private void seeSolution() {
-		executeCommand("com.chico.esiuclm.melti.commands.seeSolution");
-	}
-	
-	private void qualifySolution() {
-		executeCommand("com.chico.esiuclm.melti.commands.qualify");
+	private void seeQualification() {
+		executeCommand("com.chico.esiuclm.melti.commands.seeQualification");
 	}
 	
 	private void executeCommand(String the_command) {

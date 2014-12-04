@@ -47,13 +47,18 @@
       </command>
       <command
             categoryId="com.chico.esiuclm.melti.commands.category"
-            id="com.chico.esiuclm.melti.commands.evaluate"
+            id="com.chico.esiuclm.melti.commands.seeSolution"
             name="Ver solución">
       </command>
       <command
             categoryId="com.chico.esiuclm.melti.commands.category"
             id="com.chico.esiuclm.melti.commands.qualify"
             name="Calificar">
+      </command>
+      <command
+            categoryId="com.chico.esiuclm.melti.commands.category"
+            id="com.chico.esiuclm.melti.commands.seeQualification"
+            name="Ver calificación">
       </command>
    </extension>
    
@@ -72,12 +77,16 @@
             commandId="com.chico.esiuclm.melti.commands.uploadSolution">
       </handler>
       <handler
-            class="com.chico.esiuclm.melti.handlers.Evaluate"
-            commandId="com.chico.esiuclm.melti.commands.evaluate">
+            class="com.chico.esiuclm.melti.handlers.SeeSolution"
+            commandId="com.chico.esiuclm.melti.commands.seeSolution">
       </handler>
       <handler
             class="com.chico.esiuclm.melti.handlers.QualifySolution"
             commandId="com.chico.esiuclm.melti.commands.qualify">
+      </handler>
+      <handler
+            class="com.chico.esiuclm.melti.handlers.SeeQualification"
+            commandId="com.chico.esiuclm.melti.commands.seeQualification">
       </handler>
    </extension>
    <extension
