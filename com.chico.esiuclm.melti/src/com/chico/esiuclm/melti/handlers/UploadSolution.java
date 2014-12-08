@@ -22,7 +22,6 @@ import com.chico.esiuclm.melti.exceptions.TeacherNotLoggedException;
 import com.chico.esiuclm.melti.exceptions.UserNotLoggedException;
 import com.chico.esiuclm.melti.gui.console.MeltiConsole;
 import com.chico.esiuclm.melti.gui.dialogs.UploadDialog;
-import com.chico.esiuclm.melti.model.MeltiServer;
 import com.chico.esiuclm.melti.net.Proxy;
 
 public class UploadSolution extends AbstractHandler {
@@ -34,11 +33,60 @@ public class UploadSolution extends AbstractHandler {
 		final MessageConsoleStream my_console = MeltiConsole.getMessageConsoleStream("Console");
 		MessageBox dialog;
 		String[] task_context = null;
-		UploadDialog udialog = new UploadDialog(window.getShell());
+		UploadDialog udialog = null;
 		
-		// Comprueba que el alumno esta logeado y de paso recoge el contexto de la tarea
 		try {
+			// Comprueba que se puede subir la tarea activa en el editor
+			udialog = new UploadDialog(window.getShell());
+			
+			// Comprueba que el alumno esta logeado y de paso recoge el contexto de la tarea
 			task_context = Proxy.get().getContext();
+			
+			// Comprueba si la tarea ya fue resuelta por este alumno y se encuentra en la BBDD
+			Proxy.get().checkIfSolutionSolved(task_context);
+			
+			// El alumno cancela la subida
+			if (udialog.open()==1) 
+				return null;
+			
+			// OK, decide continuar
+			task_path = udialog.getFilePath();
+			code = udialog.getCode();
+			
+			// Comprueba que se selecciono algun fichero
+			if(task_path==null || task_path.equals("")) {
+				dialog = new MessageBox(window.getShell(), SWT.ICON_ERROR);
+				dialog.setText("Error");
+				dialog.setMessage("No seleccionó correctamente el fichero a subir");
+				dialog.open();
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						my_console.setColor(new Color(null, new RGB(255,0,0)));
+						my_console.println("["+new Date().toString()+"] ERROR: No seleccionó correctamente el fichero a subir");
+					}
+				});
+				return null;
+			}
+			
+			// Se le pide confirmar la subida de la tarea seleccionada
+			boolean result = MessageDialog.openConfirm(window.getShell(), "Confirmación de envío",
+				"Tarea a enviar: "+task_path+"\n\n"
+				+"¿Estás seguro de enviar esta tarea? No podrás modificar esta acción");
+			if (result) { // OK
+				try { // Subimos la tarea a la BBDD
+					Proxy.get().uploadSolutionToDB(task_context[0], task_context[1], task_context[2], code);
+				} catch (StudentNotLoggedException | TeacherNotLoggedException e) {e.printStackTrace();}
+				dialog = new MessageBox(window.getShell(), SWT.ICON_INFORMATION);
+				dialog.setMessage("Tarea subida con éxito");
+				dialog.open();
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						my_console.setColor(new Color(null, new RGB(0,204,0)));
+						my_console.println("["+new Date().toString()+"] OK: Tarea subida con éxito");
+					}
+				});
+			}
+			
 		} catch (UserNotLoggedException | TeacherNotLoggedException | StudentNotLoggedException e1) {
 			e1.printStackTrace();
 			dialog = new MessageBox(window.getShell(), SWT.ICON_ERROR);
@@ -52,13 +100,6 @@ public class UploadSolution extends AbstractHandler {
 				}
 			});
 			return null;
-		}
-		
-		// Comprueba si la tarea ya fue resuelta por este alumno y se encuentra en la BBDD
-		try {
-			Proxy.get().checkIfSolutionSolved(task_context);
-		} catch (ClassNotFoundException | SQLException e1) {
-			e1.printStackTrace();
 		}  catch (SolvedErrorException e1) {
 			e1.printStackTrace();
 			dialog = new MessageBox(window.getShell(), SWT.ICON_ERROR);
@@ -72,46 +113,12 @@ public class UploadSolution extends AbstractHandler {
 				}
 			});
 			return null;
-		}
-		
-		
-		if (udialog.open()==1) //Cancela la subida
-			return null; 
-		
-		task_path = udialog.getFilePath();
-		code = udialog.getCode();
-	
-		if(task_path == null || task_path.equals("")) {
-			dialog = new MessageBox(window.getShell(), SWT.ICON_ERROR);
-			dialog.setText("Error");
-			dialog.setMessage("No seleccionó correctamente el fichero a subir");
-			dialog.open();
+		} catch (ClassNotFoundException | SQLException e1) {
+			e1.printStackTrace();
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
 					my_console.setColor(new Color(null, new RGB(255,0,0)));
-					my_console.println("["+new Date().toString()+"] ERROR: No seleccionó correctamente el fichero a subir");
-				}
-			});
-			return null;
-		}
-		
-		// Pide autorizar la subida de la tarea seleccionada al usuario
-		boolean result = MessageDialog.openConfirm(window.getShell(), "Confirmación de envío",
-			"Alumno: "+MeltiServer.get().getActiveStudent().getFirst_name()+
-						" ("+MeltiServer.get().getActiveStudent().getEmail()+") "+
-			"\nTarea a enviar: "+task_path+"\n\n"
-			+"¿Estás seguro de enviar esta tarea? No podrás modificar esta acción.");
-		if (result) { // OK
-			try {
-				Proxy.get().uploadSolutionToDB(task_context[0], task_context[1], task_context[2], code);
-			} catch (StudentNotLoggedException | TeacherNotLoggedException e) {e.printStackTrace();}
-			dialog = new MessageBox(window.getShell(), SWT.ICON_INFORMATION);
-			dialog.setMessage("Tarea subida con éxito");
-			dialog.open();
-			Display.getDefault().syncExec(new Runnable() {
-				public void run() {
-					my_console.setColor(new Color(null, new RGB(0,204,0)));
-					my_console.println("["+new Date().toString()+"] OK: Tarea subida con éxito");
+					my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al consultar la base de datos de Melti");
 				}
 			});
 		}

@@ -46,6 +46,12 @@ public class MeltiServer {
 	public void getMySolutionsDB(String user_id) throws ClassNotFoundException, SQLException {
 		the_student.getMySolutionsDB(user_id);
 	}
+	public void getMyTasksDB(String user_id) throws ClassNotFoundException, SQLException {
+		the_student.getMyTasksDB(user_id);
+	}
+	public void getMyCoursesDB(String user_id) throws ClassNotFoundException, SQLException {
+		the_student.getMyCoursesDB(user_id);
+	}	
 	
 	/*
 	 * Llamadas, acciones del profesor

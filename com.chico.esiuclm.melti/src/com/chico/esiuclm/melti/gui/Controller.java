@@ -23,6 +23,7 @@ public class Controller {
 		wrapped_solutions = new ArrayList<WrappedSolution>();
 	}
 	
+	// Singleton
 	public static Controller get() {
 		if (yo==null) {
 			yo = new Controller();
@@ -30,7 +31,7 @@ public class Controller {
 		return yo;
 	}
 	
-	// Actualia la vista Enunciado con el enunciado de la tarea activa
+	// Actualiza la vista Enunciado con el enunciado de la tarea activa
 	public void updateTaskView(String task_statement) { // Realiza la llamada a la vista para refrescar
 		active_task.setStatement(task_statement);
 	}
@@ -69,30 +70,44 @@ public class Controller {
 		wrapped_solutions = wsolutions; // Actualizamos la informacion a mostrar en la vista
 	}
 	
+	// Actualiza la vista de las tareas de un alumno
 	public void updateStudentTasksView(String user_id) {
 		try {
-			Proxy.get().getMySolutionsDB(user_id);
+			Proxy.get().getMySolutionsDB(user_id); // Recoge las soluciones asociadas al alumno (actualiza su listado)
+			Proxy.get().getMyTasksDB(user_id); // Recoge las tareas asociadas del alumno (actualiza su listado)
+			Proxy.get().getMyCoursesDB(user_id); // Recoge la informacion de los cursos asociados al alumno (actualiza su listado)
 		} catch (StudentNotLoggedException | TeacherNotLoggedException e) {
 			
 		}
 		
-		Course course = MeltiServer.get().getActiveCourse(); // Recoge la informacion del curso
-		Task task = MeltiServer.get().getActiveTask(); // Recoge la informacion de la tarea
+		Course course = null; // Recoge la informacion del curso
+		Task task = null; // Recoge la informacion de la tarea
 		Student student = MeltiServer.get().getActiveStudent();
-		ArrayList<Solution> solutions = MeltiServer.get().getActiveStudent().getMySolutions(); // Recoge las soluciones de esa alumno
+		ArrayList<Task> student_tasks = MeltiServer.get().getActiveStudent().getMyTasks();
+		ArrayList<Course> student_courses = MeltiServer.get().getActiveStudent().getMyCourses();
+		ArrayList<Solution> student_solutions = MeltiServer.get().getActiveStudent().getMySolutions(); // Recoge las soluciones de esa alumno
 		
-		WrappedSolution aux;
+		WrappedSolution aux = null;
 		ArrayList<WrappedSolution> wsolutions = new ArrayList<WrappedSolution>();
-		for(int i=0; i<solutions.size(); i++) {
-			aux = new WrappedSolution(solutions.get(i),
-					course.getTitle(),
-					task.getTitle(),
-					task.getTaskClassName(),
-					student.getFirst_name()+" "+student.getLast_name(),
-					student.getEmail());
-			wsolutions.add(aux);
+		for(int i=0; i<student_solutions.size(); i++) {
+			for(int j=0; j<student_tasks.size(); j++) {
+				for(int k=0; k<student_courses.size(); k++) {
+					if(student_solutions.get(i).getTaskID().equals(student_tasks.get(j).getID())
+							&& student_solutions.get(i).getCourseID().equals(student_courses.get(k).getID())) {
+						task = student_tasks.get(j);
+						course = student_courses.get(k);
+						aux = new WrappedSolution(student_solutions.get(i),
+								course.getTitle(),
+								task.getTitle(),
+								task.getTitle().replace(" ", ""),
+								student.getFirst_name()+" "+student.getLast_name(),
+								student.getEmail());
+						wsolutions.add(aux);
+					}
+				}
+			}
 		}
-		wrapped_solutions = wsolutions;
+		wrapped_solutions = wsolutions; // Actualizamos la informacion a mostrar en la vista
 	}
 	
 	/**

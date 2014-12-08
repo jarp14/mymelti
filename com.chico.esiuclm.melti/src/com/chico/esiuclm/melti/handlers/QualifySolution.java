@@ -35,7 +35,7 @@ public class QualifySolution extends AbstractHandler {
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindowChecked(event);
-		final WrappedSolution aux = Controller.get().getActiveWrappedSolution();
+		final WrappedSolution aux = Controller.get().getActiveWrappedSolution(); // La solucion seleccionada, a evaluar
 		final MessageConsoleStream my_console = MeltiConsole.getMessageConsoleStream("Console");
 		MessageBox dialog;
 		QualifyDialog qdialog = new QualifyDialog(window.getShell());

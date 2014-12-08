@@ -213,6 +213,7 @@ public class Proxy {
 		} 
 	}
 	
+	// Recoge y actualiza las soluciones asociadas a un alumno
 	public void getMySolutionsDB(String user_id) throws StudentNotLoggedException, TeacherNotLoggedException {
 		if(contextPrepared(true)) {
 			try {
@@ -228,6 +229,37 @@ public class Proxy {
 			}
 		} 
 	}
+	
+	// Recoge y actualiza las tareas asociadas a un alumno
+	public void getMyTasksDB(String user_id) {
+		try {
+			server.getMyTasksDB(user_id);
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					my_console.setColor(new Color(null, new RGB(255,0,0)));
+					my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti");
+				}
+			});
+		}
+	}
+
+	// Recoge y actualiza los cursos asociados a un alumno
+	public void getMyCoursesDB(String user_id) {
+		try {
+			server.getMyCoursesDB(user_id);
+		} catch (ClassNotFoundException | SQLException e) {
+			e.printStackTrace();
+			Display.getDefault().syncExec(new Runnable() {
+				public void run() {
+					my_console.setColor(new Color(null, new RGB(255,0,0)));
+					my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error al acceder a la base de datos de Melti");
+				}
+			});
+		}
+	}
+	
 	
 	public void checkIfSolutionSolved(String[] task_context) throws ClassNotFoundException, SQLException, SolvedErrorException {
 		server.checkIfSolutionSolvedDB(task_context);

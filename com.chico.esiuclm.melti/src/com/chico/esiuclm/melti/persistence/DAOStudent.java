@@ -7,9 +7,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import com.chico.esiuclm.melti.exceptions.SolvedErrorException;
+import com.chico.esiuclm.melti.model.Course;
 import com.chico.esiuclm.melti.model.MeltiServer;
 import com.chico.esiuclm.melti.model.Solution;
 import com.chico.esiuclm.melti.model.Student;
+import com.chico.esiuclm.melti.model.Task;
 
 public class DAOStudent {
 
@@ -22,7 +24,7 @@ public class DAOStudent {
 		cs.setString(3, the_student.getLast_name());
 		cs.setString(4, the_student.getEmail());
 		cs.setString(5, the_student.getCourseID());
-		cs.executeUpdate();
+		cs.executeUpdate(); // Añade el estudiante a la BBDD
 		db.close();
 	}
 
@@ -36,7 +38,7 @@ public class DAOStudent {
 		cs.setString(4, solution.getSvdCode());
 		cs.setDouble(5, solution.getCalification());
 		cs.setString(6, solution.getCComment());
-		cs.executeUpdate();
+		cs.executeUpdate(); // Añade su solucion a la BBDD
 		db.close();
 	}
 
@@ -49,7 +51,8 @@ public class DAOStudent {
 		cs.setString(3, task_context[2]);
 		cs.registerOutParameter(4, java.sql.Types.BOOLEAN);
 		cs.executeUpdate();
-		if (cs.getBoolean(4)) throw new SolvedErrorException(); //Si el usuario esta ya onLine
+		// Si esa tarea ya esta resuelta por el alumno
+		if (cs.getBoolean(4)) throw new SolvedErrorException(); 
 		bd.close();
 	}
 
@@ -67,7 +70,44 @@ public class DAOStudent {
 			solutions.add(aux);
 		}
 		
-		MeltiServer.get().getActiveStudent().setMySolutions(solutions); // Las guardamos en el curso activo
+		// Guardamos la informacion de sus soluciones asociadas
+		MeltiServer.get().getActiveStudent().setMySolutions(solutions); 
+		db.close();
+	}
+
+	public static void getMyCoursesDB(String user_id) throws SQLException, ClassNotFoundException {
+		Broker broker = Broker.get();
+		Connection db = broker.getDB();
+		CallableStatement cs = db.prepareCall("{call getMyCourses(?)}");
+		cs.setString(1, user_id);
+		ResultSet rs = cs.executeQuery();
+		ArrayList<Course> courses = new ArrayList<Course>();
+		
+		while(rs.next()) {
+			Course aux = new Course(rs.getString(1), rs.getString(2));
+			courses.add(aux);
+		}
+		
+		// Guardamos la informacion de sus cursos asociados
+		MeltiServer.get().getActiveStudent().setMyCourses(courses);
+		db.close();
+	}
+	
+	public static void getMyTasksDB(String user_id) throws SQLException, ClassNotFoundException {
+		Broker broker = Broker.get();
+		Connection db = broker.getDB();
+		CallableStatement cs = db.prepareCall("{call getMyTasks(?)}");
+		cs.setString(1, user_id);
+		ResultSet rs = cs.executeQuery();
+		ArrayList<Task> tasks = new ArrayList<Task>();
+		
+		while(rs.next()) {
+			Task aux = new Task(rs.getString(1), rs.getString(2));
+			tasks.add(aux);
+		}
+		
+		// Guardamos la informacion de sus tareas asociadas
+		MeltiServer.get().getActiveStudent().setMyTasks(tasks);
 		db.close();
 	}
 	

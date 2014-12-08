@@ -12,6 +12,11 @@ public class Course {
 	private ArrayList<Student> the_students; // El listado de alumnos del curso
 	private ArrayList<Solution> the_solutions; // Guarda las resoluciones del curso
 	
+	public Course(String id, String ct) {
+		this.id = id;
+		this.title = ct;
+	}
+	
 	public Course(String id, String title, String label) {
 		this.id = id;
 		this.title = title;

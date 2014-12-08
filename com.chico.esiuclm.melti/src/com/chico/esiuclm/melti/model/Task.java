@@ -16,6 +16,11 @@ public class Task extends ModelObject {
 		this.statement = st;
 	}
 	
+	public Task(String id, String tt) {
+		this.id = id;
+		this.task_title = tt;
+	}
+	
 	public Task(String id, String tt, String tcn, String st, String co, String cId) {
 		this.id = id;
 		this.task_title = tt;
