@@ -419,10 +419,10 @@ public class Proxy {
 	}
 	
 	// Metodo encargado de crear el proyecto JAVA en el workspace del usuario
-	public boolean createProject(String projectName, String combination, String fileCode, String fileName, 
+	public boolean createProject(String projectName, String user, String fileCode, String fileName, 
 			boolean profesor) throws Exception {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-	    IProject project = root.getProject(projectName.replace(" ","")+"_"+combination); // Para asociarlo a un usuario
+	    IProject project = root.getProject(projectName.replace(" ","")+"_"+user);
 	    IJavaProject javaProject = null;
 	    IProgressMonitor progressMonitor = new NullProgressMonitor();
 	    

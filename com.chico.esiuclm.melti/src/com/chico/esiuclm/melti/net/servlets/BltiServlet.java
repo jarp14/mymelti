@@ -167,7 +167,7 @@ public class BltiServlet extends HttpServlet {
 		switch(errorkey) {
 			case 0:
 				out.println("<h1>Validación de credenciales incorrecta</h1>\n");
-				out.println("<h3>:(</h3>\n");
+				out.println("<h3>Asegúrese que sus datos sean idénticos en ambos sistemas</h3>\n");
 				out.println("<pre><i>Si el problema persiste consulte con su profesor</i></pre>");
 				out.println("</center>");
 				out.println("</body>");
@@ -211,8 +211,8 @@ public class BltiServlet extends HttpServlet {
 				out.println("</html>");
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
-						my_console.setColor(new Color(null, new RGB(255,0,0)));
-						my_console.println("["+new Date().toString()+"] ERROR: La tarea ya fue resuelta y enviada\nNo tienes más intentos");
+						my_console.setColor(new Color(null, new RGB(204,204,0)));
+						my_console.println("["+new Date().toString()+"] WARNING: La tarea ya fue resuelta y enviada\nNo tienes más intentos");
 					}
 				});
 				break;

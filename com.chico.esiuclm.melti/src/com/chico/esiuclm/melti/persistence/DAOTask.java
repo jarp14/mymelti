@@ -11,12 +11,13 @@ public class DAOTask {
 	public static void addTaskDB(Task the_task) throws ClassNotFoundException, SQLException {
 		Broker broker = Broker.get();
 		Connection db = broker.getDB();
-		CallableStatement cs = db.prepareCall("{call addTask(?,?,?,?,?)}");
+		CallableStatement cs = db.prepareCall("{call addTask(?,?,?,?,?,?)}");
 		cs.setString(1, the_task.getID());
 		cs.setString(2, the_task.getTitle());
-		cs.setString(3, the_task.getStatement());
-		cs.setString(4, the_task.getCode());
-		cs.setString(5, the_task.getCourseID());
+		cs.setString(3, the_task.getTaskClassName());
+		cs.setString(4, the_task.getStatement());
+		cs.setString(5, the_task.getCode());
+		cs.setString(6, the_task.getCourseID());
 		cs.executeUpdate();
 		db.close();
 	}

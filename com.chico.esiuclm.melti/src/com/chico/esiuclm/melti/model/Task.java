@@ -12,15 +12,19 @@ public class Task extends ModelObject {
 	private String task_title;
 	private String task_className;
 	
+	// Tarea asociada a la vista Statement
 	public Task(String st) {
 		this.statement = st;
 	}
 	
-	public Task(String id, String tt) {
+	// Tarea asociada a un alumno
+	public Task(String id, String tt, String cn) {
 		this.id = id;
 		this.task_title = tt;
+		this.task_className = cn;
 	}
 	
+	// Toda la informacion relevante de una tarea
 	public Task(String id, String tt, String tcn, String st, String co, String cId) {
 		this.id = id;
 		this.task_title = tt;

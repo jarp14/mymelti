@@ -65,7 +65,7 @@ public class DAOStudent {
 		ArrayList<Solution> solutions = new ArrayList<Solution>();
 		
 		while(rs.next()) {
-			Solution aux = new Solution(user_id, rs.getString(1), rs.getString(2), 
+			Solution aux = new Solution(user_id, rs.getString(1), rs.getString(2),
 					rs.getString(3), rs.getDouble(4), rs.getString(5));
 			solutions.add(aux);
 		}
@@ -102,7 +102,7 @@ public class DAOStudent {
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
 		while(rs.next()) {
-			Task aux = new Task(rs.getString(1), rs.getString(2));
+			Task aux = new Task(rs.getString(1), rs.getString(2), rs.getString(3));
 			tasks.add(aux);
 		}
 		

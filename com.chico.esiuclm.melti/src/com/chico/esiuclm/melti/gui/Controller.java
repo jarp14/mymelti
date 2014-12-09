@@ -99,7 +99,7 @@ public class Controller {
 						aux = new WrappedSolution(student_solutions.get(i),
 								course.getTitle(),
 								task.getTitle(),
-								task.getTitle().replace(" ", ""),
+								task.getTaskClassName(),
 								student.getFirst_name()+" "+student.getLast_name(),
 								student.getEmail());
 						wsolutions.add(aux);
