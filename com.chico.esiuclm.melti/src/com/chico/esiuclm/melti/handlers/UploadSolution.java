@@ -57,12 +57,12 @@ public class UploadSolution extends AbstractHandler {
 			if(task_path==null || task_path.equals("")) {
 				dialog = new MessageBox(window.getShell(), SWT.ICON_ERROR);
 				dialog.setText("Error");
-				dialog.setMessage("No seleccionó correctamente el fichero a subir");
+				dialog.setMessage("Se produjo un error en la captura de parámetros");
 				dialog.open();
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						my_console.setColor(new Color(null, new RGB(255,0,0)));
-						my_console.println("["+new Date().toString()+"] ERROR: No seleccionó correctamente el fichero a subir");
+						my_console.println("["+new Date().toString()+"] ERROR: Se produjo un error en la captura de parámetros");
 					}
 				});
 				return null;

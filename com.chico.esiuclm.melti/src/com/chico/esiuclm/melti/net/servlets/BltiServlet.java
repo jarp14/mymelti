@@ -3,6 +3,7 @@ package com.chico.esiuclm.melti.net.servlets;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
+import java.sql.SQLException;
 import java.util.Date;
 
 import javax.servlet.ServletConfig;
@@ -22,6 +23,10 @@ import com.chico.esiuclm.melti.exceptions.NotCodeException;
 import com.chico.esiuclm.melti.exceptions.NotProfesorException;
 import com.chico.esiuclm.melti.exceptions.NotStatementException;
 import com.chico.esiuclm.melti.exceptions.NotStudentException;
+import com.chico.esiuclm.melti.exceptions.SolvedErrorException;
+import com.chico.esiuclm.melti.exceptions.StudentNotLoggedException;
+import com.chico.esiuclm.melti.exceptions.TeacherNotLoggedException;
+import com.chico.esiuclm.melti.exceptions.UserNotLoggedException;
 import com.chico.esiuclm.melti.gui.console.MeltiConsole;
 import com.chico.esiuclm.melti.net.Proxy;
 import com.chico.esiuclm.melti.net.oauth.OAuthException;
@@ -110,11 +115,26 @@ public class BltiServlet extends HttpServlet {
 		if (user_role.equals("Instructor")) { 
 			Proxy.get().setActiveTeacher(user_id, user_firstName, user_lastName, user_email, null, course_id);
 			Proxy.get().updateSolutionsView(task_id, course_id); // Recibe las soluciones de ese contexto, actualiza la vista
-		} // Si el cliente es un Estudiante
+		} // Si el cliente es un Alumno
 		else if (user_role.equals("Learner")) { 
 			// Lo anadimos a la BD si no esta todavia
 			Proxy.get().addStudentToDB(user_id, user_firstName, user_lastName, user_email, user_role, course_id);
 			Proxy.get().updateStudentTasksView(user_id);
+			
+			try {
+				String[] task_context = Proxy.get().getContext();
+				Proxy.get().checkIfSolutionSolved(task_context);
+			} catch (StudentNotLoggedException | TeacherNotLoggedException
+						| UserNotLoggedException e) {
+					e.printStackTrace();
+			} catch (ClassNotFoundException | SQLException e) {
+				e.printStackTrace();
+			} catch (SolvedErrorException e) {
+				e.printStackTrace();
+				doError(request, response, 3);
+				return;
+			}
+			
 			try { // Creamos proyecto Java con la tarea
 				if (Proxy.get().createProject(task_title, user_firstName+user_lastName, task_code, 
 						Proxy.get().checkFileName(task_class_name), false)) {
@@ -125,7 +145,6 @@ public class BltiServlet extends HttpServlet {
 									+" ya se encuentra en el espacio de trabajo\nNo ha sido sobreescrito por seguridad");
 						}
 					});
-					
 				}
 			} catch (Exception e) {
 				Display.getDefault().syncExec(new Runnable() {
@@ -149,7 +168,7 @@ public class BltiServlet extends HttpServlet {
 			case 0:
 				out.println("<h1>Validación de credenciales incorrecta</h1>\n");
 				out.println("<h3>:(</h3>\n");
-				out.println("<pre><i>Consulte con su profesor</i></pre>");
+				out.println("<pre><i>Si el problema persiste consulte con su profesor</i></pre>");
 				out.println("</center>");
 				out.println("</body>");
 				out.println("</html>");
@@ -182,6 +201,20 @@ public class BltiServlet extends HttpServlet {
 				out.println("</center>");
 				out.println("</body>");
 				out.println("</html>");
+				break;
+				
+			case 3:
+				out.println("<h1>Tarea resuelta</h1>\n");
+				out.println("<h3>Ya no tienes más intentos para resolver esta tarea</h3>\n");
+				out.println("</center>");
+				out.println("</body>");
+				out.println("</html>");
+				Display.getDefault().syncExec(new Runnable() {
+					public void run() {
+						my_console.setColor(new Color(null, new RGB(255,0,0)));
+						my_console.println("["+new Date().toString()+"] ERROR: La tarea ya fue resuelta y enviada\nNo tienes más intentos");
+					}
+				});
 				break;
 				
 			default:

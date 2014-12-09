@@ -33,24 +33,25 @@ public class QualificationDialog extends Dialog {
 		
 		label = new Label(container, SWT.LEFT);
 		label.setText("Tarea: ");
-		label = new Label(container, SWT.BORDER);
+		label = new Label(container, SWT.LEFT);
 		label.setText(aux.getTask_title());
 		
 		label = new Label(container, SWT.LEFT);
 		label.setText("Curso:");
-		label = new Label(container, SWT.BORDER);
+		label = new Label(container, SWT.LEFT);
 		label.setText(aux.getCourse_title());
 		
 		label = new Label(container, SWT.LEFT);
 		label.setText("Nota:");
-		label = new Label(container, SWT.BORDER);
+		label = new Label(container, SWT.LEFT);
 		label.setText(aux.getCalification()+"");
 		
-		label = new Label(container, SWT.TOP);
+		label = new Label(container, SWT.LEFT);
 		label.setText("Comentarios: ");
 		label.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
-		label = new Label(container, SWT.MULTI | SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
-		label.setLayoutData(new GridData(GridData.FILL_BOTH));		
+		label = new Label(container, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL);
+		label.setLayoutData(new GridData(GridData.FILL_BOTH));
+		label.setText(aux.getCComment());
 		
 		return container;
 	}
@@ -63,7 +64,7 @@ public class QualificationDialog extends Dialog {
 	
 	@Override
 	protected Point getInitialSize() {
-		return new Point(640, 480);
+		return new Point(440, 440);
 	}
 	
 	@Override

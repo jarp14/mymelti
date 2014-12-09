@@ -32,7 +32,7 @@ public class SeeQualification extends AbstractHandler {
 		if (aux.getCalification()==-1) { // La tarea aún no ha sido calificada, se informa
 			dialog = new MessageBox(window.getShell(), SWT.ICON_ERROR);
 			dialog.setText("Tarea sin calificar");
-			dialog.setMessage("Esta tarea aún no ha sido cailficada por su profesor");
+			dialog.setMessage("Esta tarea aún no ha sido calificada por su profesor");
 			dialog.open();
 			Display.getDefault().syncExec(new Runnable() {
 				public void run() {
