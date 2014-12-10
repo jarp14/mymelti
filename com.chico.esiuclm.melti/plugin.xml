@@ -60,6 +60,16 @@
             id="com.chico.esiuclm.melti.commands.seeQualification"
             name="Ver calificación">
       </command>
+      <command
+            categoryId="com.chico.esiuclm.melti.commands.category"
+            id="com.chico.esiuclm.melti.commands.refreshSolutions"
+            name="Refrescar soluciones">
+      </command>
+      <command
+            categoryId="com.chico.esiuclm.melti.commands.category"
+            id="com.chico.esiuclm.melti.commands.refreshTasks"
+            name="Refrescar tareas">
+      </command>
    </extension>
    
    <extension
@@ -87,6 +97,14 @@
       <handler
             class="com.chico.esiuclm.melti.handlers.SeeQualification"
             commandId="com.chico.esiuclm.melti.commands.seeQualification">
+      </handler>
+      <handler
+            class="com.chico.esiuclm.melti.handlers.RefreshSolutionsView"
+            commandId="com.chico.esiuclm.melti.commands.refreshSolutions">
+      </handler>
+      <handler
+            class="com.chico.esiuclm.melti.handlers.RefreshTasksView"
+            commandId="com.chico.esiuclm.melti.commands.refreshTasks">
       </handler>
    </extension>
    <extension

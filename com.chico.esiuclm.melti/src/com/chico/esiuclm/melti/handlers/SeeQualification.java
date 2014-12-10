@@ -18,7 +18,7 @@ import org.eclipse.ui.handlers.HandlerUtil;
 import com.chico.esiuclm.melti.gui.Controller;
 import com.chico.esiuclm.melti.gui.console.MeltiConsole;
 import com.chico.esiuclm.melti.gui.dialogs.QualificationDialog;
-import com.chico.esiuclm.melti.gui.views.WrappedSolution;
+import com.chico.esiuclm.melti.model.WrappedSolution;
 import com.chico.esiuclm.melti.net.Proxy;
 
 public class SeeQualification extends AbstractHandler {

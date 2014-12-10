@@ -11,7 +11,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import com.chico.esiuclm.melti.gui.Controller;
-import com.chico.esiuclm.melti.gui.views.WrappedSolution;
+import com.chico.esiuclm.melti.model.WrappedSolution;
 
 public class QualificationDialog extends Dialog {
 	

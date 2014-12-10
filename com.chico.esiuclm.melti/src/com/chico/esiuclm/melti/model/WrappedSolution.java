@@ -1,6 +1,5 @@
-package com.chico.esiuclm.melti.gui.views;
+package com.chico.esiuclm.melti.model;
 
-import com.chico.esiuclm.melti.model.Solution;
 
 /**
  * Objetos para adaptar a la vista SolutionsView

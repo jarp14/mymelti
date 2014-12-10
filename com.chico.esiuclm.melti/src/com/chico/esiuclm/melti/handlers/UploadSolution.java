@@ -22,6 +22,7 @@ import com.chico.esiuclm.melti.exceptions.TeacherNotLoggedException;
 import com.chico.esiuclm.melti.exceptions.UserNotLoggedException;
 import com.chico.esiuclm.melti.gui.console.MeltiConsole;
 import com.chico.esiuclm.melti.gui.dialogs.UploadDialog;
+import com.chico.esiuclm.melti.model.MeltiServer;
 import com.chico.esiuclm.melti.net.Proxy;
 
 public class UploadSolution extends AbstractHandler {
@@ -75,6 +76,7 @@ public class UploadSolution extends AbstractHandler {
 			if (result) { // OK
 				try { // Subimos la tarea a la BBDD
 					Proxy.get().uploadSolutionToDB(task_context[0], task_context[1], task_context[2], code);
+					Proxy.get().updateStudentTasksView(MeltiServer.get().getActiveStudent().getID());
 				} catch (StudentNotLoggedException | TeacherNotLoggedException e) {e.printStackTrace();}
 				dialog = new MessageBox(window.getShell(), SWT.ICON_INFORMATION);
 				dialog.setMessage("Tarea subida con éxito");

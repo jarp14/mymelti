@@ -9,6 +9,7 @@ import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -32,13 +33,14 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.IServiceLocator;
 
 import com.chico.esiuclm.melti.gui.Controller;
+import com.chico.esiuclm.melti.model.WrappedSolution;
 
 public class MyTasksView extends ViewPart {
 
 	public static final String ID = "com.chico.esiuclm.melti.views.mytasksView";
 	private TableViewer viewer;
 	private Action seeQualificationAction;
-	// TODO refrescar la vista
+	private Action refreshAction;
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -79,7 +81,7 @@ public class MyTasksView extends ViewPart {
 		
 		createActions();
 		createContextMenu();
-		//createToolbar();
+		createToolbar();
 		
 		hookDoubleClick();
 	}
@@ -99,7 +101,7 @@ public class MyTasksView extends ViewPart {
 				result = ws.getCourse_title();
 				break;
 			case 2:
-				if(ws.getCalification()==-1.0) result = "No calificado";
+				if(ws.getCalification()==-1) result = "No calificado";
 				else result = ws.getCalification()+"";
 				break;
 			default:
@@ -115,14 +117,19 @@ public class MyTasksView extends ViewPart {
 	}
 	
 	public void refresh() {
-		// Llamada al controlador para que actualice el Array TODO
-		viewer.refresh();
+		viewer.setInput(Controller.get().getWrappedSolutions());
 	}
 		
 	public void createActions() {
 		seeQualificationAction = new Action("Ver calificación") {
 			public void run() {
 				seeQualification();
+			}
+		};
+		
+		refreshAction = new Action("Refrescar") {
+			public void run() {
+				refreshTasks();
 			}
 		};
 	}
@@ -159,10 +166,26 @@ public class MyTasksView extends ViewPart {
 		executeCommand("com.chico.esiuclm.melti.commands.seeQualification");
 	}
 	
+	private void refreshTasks() {
+		executeRefreshCommand("com.chico.esiuclm.melti.commands.refreshTasks");
+	}
+	
 	private void executeCommand(String the_command) {
 		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 		if (selection.isEmpty()) return;
 		Controller.get().setActiveWrappedSolution((WrappedSolution) selection.getFirstElement()); // Obtenemos los valores para trabajar con ellos
+		IServiceLocator serviceLocator = PlatformUI.getWorkbench();
+		ICommandService commandService = (ICommandService) serviceLocator.getService(ICommandService.class);
+		Command command = commandService.getCommand(the_command);
+		try {
+			command.executeWithChecks(new ExecutionEvent());
+		} catch (ExecutionException | NotDefinedException
+				| NotEnabledException | NotHandledException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void executeRefreshCommand(String the_command) {
 		IServiceLocator serviceLocator = PlatformUI.getWorkbench();
 		ICommandService commandService = (ICommandService) serviceLocator.getService(ICommandService.class);
 		Command command = commandService.getCommand(the_command);
@@ -179,9 +202,9 @@ public class MyTasksView extends ViewPart {
 		mgr.add(selectAllAction);
 	}*/
 
-	/*private void createToolbar() {
+	private void createToolbar() {
 		IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
-		mgr.add(selectAllAction);
-	}*/
+		mgr.add(refreshAction);
+	}
 
 }

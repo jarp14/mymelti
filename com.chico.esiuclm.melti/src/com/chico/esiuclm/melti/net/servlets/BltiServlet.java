@@ -124,8 +124,7 @@ public class BltiServlet extends HttpServlet {
 			try {
 				String[] task_context = Proxy.get().getContext();
 				Proxy.get().checkIfSolutionSolved(task_context);
-			} catch (StudentNotLoggedException | TeacherNotLoggedException
-						| UserNotLoggedException e) {
+			} catch (UserNotLoggedException | StudentNotLoggedException | TeacherNotLoggedException e) {
 					e.printStackTrace();
 			} catch (ClassNotFoundException | SQLException e) {
 				e.printStackTrace();
@@ -212,7 +211,7 @@ public class BltiServlet extends HttpServlet {
 				Display.getDefault().syncExec(new Runnable() {
 					public void run() {
 						my_console.setColor(new Color(null, new RGB(204,204,0)));
-						my_console.println("["+new Date().toString()+"] WARNING: La tarea ya fue resuelta y enviada\nNo tienes más intentos");
+						my_console.println("["+new Date().toString()+"] WARNING: Esta tarea ya fue resuelta y enviada\nNo tienes más intentos");
 					}
 				});
 				break;

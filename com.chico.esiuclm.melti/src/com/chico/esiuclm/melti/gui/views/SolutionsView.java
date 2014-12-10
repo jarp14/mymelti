@@ -9,6 +9,7 @@ import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -32,14 +33,16 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.IServiceLocator;
 
 import com.chico.esiuclm.melti.gui.Controller;
+import com.chico.esiuclm.melti.model.WrappedSolution;
 
 public class SolutionsView extends ViewPart {
 
 	public static final String ID = "com.chico.esiuclm.melti.views.solutionsView";
 	private TableViewer viewer;
 	private Action seeSolutionAction, qualifyAction;
+	private Action refreshAction;
 	// TODO private Action deleteCourse;
-	// TODO refrescar la vista
+	// TODO private Action deleteTask;
 	
 	@Override
 	public void createPartControl(Composite parent) {
@@ -94,7 +97,7 @@ public class SolutionsView extends ViewPart {
 		
 		createActions();
 		createContextMenu();
-		//createToolbar();
+		createToolbar();
 		
 		hookDoubleClick();
 	}
@@ -107,25 +110,25 @@ public class SolutionsView extends ViewPart {
 			WrappedSolution ws = (WrappedSolution) element;
 			String result = "";
 			switch(columnIndex){
-			case 0:
-				result = ws.getTask_title();
-				break;
-			case 1:
-				result = ws.getStudent_name_family();
-				break;
-			case 2:
-				result = ws.getStudent_email();
-				break;
-			case 3:
-				result = ws.getCourse_title();
-				break;
-			case 4:
-				if(ws.getCalification()==-1.0) result = "No calificado";
-				else result = ws.getCalification()+"";
-				break;
-			default:
-				result = "";
-			}
+				case 0:
+					result = ws.getTask_title();
+					break;
+				case 1:
+					result = ws.getStudent_name_family();
+					break;
+				case 2:
+					result = ws.getStudent_email();
+					break;
+				case 3:
+					result = ws.getCourse_title();
+					break;
+				case 4:
+					if(ws.getCalification()==-1) result = "No calificado";
+					else result = ws.getCalification()+"";
+					break;
+				default:
+					result = "";
+				}
 			return result;
 		}
 	}
@@ -136,8 +139,7 @@ public class SolutionsView extends ViewPart {
 	}
 	
 	public void refresh() {
-		// Llamada al controlador para que actualice el Array TODO
-		viewer.refresh();
+		viewer.setInput(Controller.get().getWrappedSolutions());
 	}
 		
 	public void createActions() {
@@ -150,6 +152,12 @@ public class SolutionsView extends ViewPart {
 		qualifyAction = new Action("Calificar") {
 			public void run() {
 				qualifySolution();
+			}
+		};
+		
+		refreshAction = new Action("Refrescar") {
+			public void run() {
+				refreshSolutions();
 			}
 		};
 	}
@@ -187,6 +195,10 @@ public class SolutionsView extends ViewPart {
 		executeCommand("com.chico.esiuclm.melti.commands.seeSolution");
 	}
 	
+	private void refreshSolutions() {
+		executeRefreshCommand("com.chico.esiuclm.melti.commands.refreshSolutions");
+	}
+	
 	private void qualifySolution() {
 		executeCommand("com.chico.esiuclm.melti.commands.qualify");
 	}
@@ -206,14 +218,26 @@ public class SolutionsView extends ViewPart {
 		}
 	}
 	
+	private void executeRefreshCommand(String the_command) {
+		IServiceLocator serviceLocator = PlatformUI.getWorkbench();
+		ICommandService commandService = (ICommandService) serviceLocator.getService(ICommandService.class);
+		Command command = commandService.getCommand(the_command);
+		try {
+			command.executeWithChecks(new ExecutionEvent());
+		} catch (ExecutionException | NotDefinedException
+				| NotEnabledException | NotHandledException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/*private void createMenu() {
 		IMenuManager mgr = getViewSite().getActionBars().getMenuManager();
 		mgr.add(selectAllAction);
 	}*/
 
-	/*private void createToolbar() {
+	private void createToolbar() {
 		IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
-		mgr.add(selectAllAction);
-	}*/
+		mgr.add(refreshAction);
+	}
 
 }

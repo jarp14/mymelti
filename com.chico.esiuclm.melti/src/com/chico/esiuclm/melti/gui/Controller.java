@@ -2,14 +2,20 @@ package com.chico.esiuclm.melti.gui;
 
 import java.util.ArrayList;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
+
 import com.chico.esiuclm.melti.exceptions.StudentNotLoggedException;
 import com.chico.esiuclm.melti.exceptions.TeacherNotLoggedException;
-import com.chico.esiuclm.melti.gui.views.WrappedSolution;
+import com.chico.esiuclm.melti.gui.views.MyTasksView;
+import com.chico.esiuclm.melti.gui.views.SolutionsView;
 import com.chico.esiuclm.melti.model.Course;
 import com.chico.esiuclm.melti.model.MeltiServer;
 import com.chico.esiuclm.melti.model.Solution;
 import com.chico.esiuclm.melti.model.Student;
 import com.chico.esiuclm.melti.model.Task;
+import com.chico.esiuclm.melti.model.WrappedSolution;
 import com.chico.esiuclm.melti.net.Proxy;
 
 public class Controller {
@@ -68,6 +74,19 @@ public class Controller {
 			}
 		}
 		wrapped_solutions = wsolutions; // Actualizamos la informacion a mostrar en la vista
+		
+		// Se notifica la vista
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				try {
+					SolutionsView sv = (SolutionsView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("com.chico.esiuclm.melti.views.solutionsView");
+					sv.refresh();
+				} catch (PartInitException e) {
+					e.printStackTrace();
+				}
+
+			}
+		});
 	}
 	
 	// Actualiza la vista de las tareas de un alumno
@@ -76,9 +95,7 @@ public class Controller {
 			Proxy.get().getMySolutionsDB(user_id); // Recoge las soluciones asociadas al alumno (actualiza su listado)
 			Proxy.get().getMyTasksDB(user_id); // Recoge las tareas asociadas del alumno (actualiza su listado)
 			Proxy.get().getMyCoursesDB(user_id); // Recoge la informacion de los cursos asociados al alumno (actualiza su listado)
-		} catch (StudentNotLoggedException | TeacherNotLoggedException e) {
-			
-		}
+		} catch (StudentNotLoggedException | TeacherNotLoggedException e) { e.printStackTrace(); }
 		
 		Course course = null; // Recoge la informacion del curso
 		Task task = null; // Recoge la informacion de la tarea
@@ -108,6 +125,19 @@ public class Controller {
 			}
 		}
 		wrapped_solutions = wsolutions; // Actualizamos la informacion a mostrar en la vista
+		
+		// Se notifica la vista
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				try {
+					MyTasksView tv = (MyTasksView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView("com.chico.esiuclm.melti.views.mytasksView");
+					tv.refresh();
+				} catch (PartInitException e) {
+					e.printStackTrace();
+				}
+
+			}
+		});
 	}
 	
 	/**

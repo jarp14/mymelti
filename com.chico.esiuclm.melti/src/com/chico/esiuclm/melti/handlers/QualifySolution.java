@@ -20,7 +20,7 @@ import com.chico.esiuclm.melti.exceptions.TeacherNotLoggedException;
 import com.chico.esiuclm.melti.gui.Controller;
 import com.chico.esiuclm.melti.gui.console.MeltiConsole;
 import com.chico.esiuclm.melti.gui.dialogs.QualifyDialog;
-import com.chico.esiuclm.melti.gui.views.WrappedSolution;
+import com.chico.esiuclm.melti.model.WrappedSolution;
 import com.chico.esiuclm.melti.net.Proxy;
 
 /*
@@ -39,6 +39,7 @@ public class QualifySolution extends AbstractHandler {
 		final MessageConsoleStream my_console = MeltiConsole.getMessageConsoleStream("Console");
 		int qualified = 0;
 		MessageBox dialog;
+		MessageDialog msgDialog;
 		QualifyDialog qdialog = new QualifyDialog(window.getShell());
 		
 		if (aux.getCalification()!=-1) { // La tarea ya fue calificada, se informa y se pregunta
@@ -52,6 +53,13 @@ public class QualifySolution extends AbstractHandler {
 			});
 			if (!result) return null;
 			qualified = 1;
+		} else {			
+			msgDialog = new MessageDialog(window.getShell(), "Confirmar", null, 
+					"¿Estás seguro de querer calificar la solución de "+aux.getStudent_name_family()+"?",
+					MessageDialog.QUESTION, new String[] {"Sí","No"}, 0);
+			
+			if(msgDialog.open()==1) 
+				return null;
 		}
 		
 		if(qdialog.open()==1) // Canceló la operación
@@ -98,6 +106,7 @@ public class QualifySolution extends AbstractHandler {
 			// Procede a enviar la calificacion a la BBDD
 			try {
 				Proxy.get().addQualificationToDB(aux.getStudentID(), aux.getTaskID(), aux.getCourseID(), code, grade, comments);
+				Proxy.get().updateSolutionsView(aux.getTaskID(), aux.getCourseID());
 			} catch (StudentNotLoggedException | TeacherNotLoggedException e) {e.printStackTrace();}
 			dialog = new MessageBox(window.getShell(), SWT.ICON_INFORMATION);
 			if (qualified==0) dialog.setMessage("Alumno "+aux.getStudent_name_family()+" calificado con éxito");
