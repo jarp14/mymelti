@@ -97,9 +97,6 @@ public class BltiServlet extends HttpServlet {
 			return;
 		}
 		
-		// Todas las comprobaciones resultaron exitosas
-		Proxy.get().sayOK(response);
-		
 		/**
 		 * Tras las comprobaciones exitosas...
 		 * Generacion de objetos para su manipulacion en la sesion
@@ -111,19 +108,19 @@ public class BltiServlet extends HttpServlet {
 		// Envia la llamada para actualizar la vista enunciado
 		Proxy.get().updateTaskView(task_statement); 
 		
-		// Si el cliente es un Profesor
-		if (user_role.equals("Instructor")) { 
+		if (user_role.equals("Instructor")) { // Si el cliente es un Profesor
 			Proxy.get().setActiveTeacher(user_id, user_firstName, user_lastName, user_email, null, course_id);
 			Proxy.get().updateSolutionsView(task_id, course_id); // Recibe las soluciones de ese contexto, actualiza la vista
-		} // Si el cliente es un Alumno
-		else if (user_role.equals("Learner")) { 
+			Proxy.get().sayOK(response); // Muestra un mensaje de bienvenida
+		} 
+		else if (user_role.equals("Learner")) { // Si el cliente es un Alumno
 			// Lo anadimos a la BD si no esta todavia
 			Proxy.get().addStudentToDB(user_id, user_firstName, user_lastName, user_email, user_role, course_id);
 			Proxy.get().updateStudentTasksView(user_id);
-			
 			try {
 				String[] task_context = Proxy.get().getContext();
 				Proxy.get().checkIfSolutionSolved(task_context);
+				Proxy.get().sayOK(response); // Muestra un mensaje de bienvenida
 			} catch (UserNotLoggedException | StudentNotLoggedException | TeacherNotLoggedException e) {
 					e.printStackTrace();
 			} catch (ClassNotFoundException | SQLException e) {
@@ -180,7 +177,7 @@ public class BltiServlet extends HttpServlet {
 				break;
 			case 1:
 				out.println("<h1>Error inesperado</h1>\n");
-				out.println("<h3>No se encuentra el enunciado</h3>\n");
+				out.println("<h3>Oops!... No se encuentra el enunciado</h3>\n");
 				out.println("<pre><i>Consulte con su profesor</i></pre>");
 				out.println("</center>");
 				out.println("</body>");
@@ -195,7 +192,7 @@ public class BltiServlet extends HttpServlet {
 				
 			case 2: 
 				out.println("<h1>Error inesperado</h1>\n");
-				out.println("<h3>No se encuentra el código del problema</h3>\n");
+				out.println("<h3>Oops!... No se encuentra el código del problema</h3>\n");
 				out.println("<pre><i>Consulte con su profesor</i></pre>");
 				out.println("</center>");
 				out.println("</body>");
@@ -204,7 +201,8 @@ public class BltiServlet extends HttpServlet {
 				
 			case 3:
 				out.println("<h1>Tarea resuelta</h1>\n");
-				out.println("<h3>Ya no tienes más intentos para resolver esta tarea</h3>\n");
+				out.println("<h3>Oops!... Ya no tienes más intentos para resolver esta tarea</h3>\n");
+				out.println("<pre><i>Sin embargo, puedes consultar las calificaciones de tus tareas subidas, ¡suerte!</i></pre>");
 				out.println("</center>");
 				out.println("</body>");
 				out.println("</html>");

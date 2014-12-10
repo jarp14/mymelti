@@ -138,7 +138,7 @@ public class UploadDialog extends Dialog {
 	
 	@Override
 	protected Point getInitialSize() {
-		return new Point(460, 210);
+		return new Point(610, 210);
 	}
 	
 	@Override

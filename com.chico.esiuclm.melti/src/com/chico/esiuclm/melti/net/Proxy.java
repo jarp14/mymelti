@@ -361,7 +361,7 @@ public class Proxy {
 			ids[0] = server.getActiveStudent().getID();
 			ids[1] = server.getActiveTask().getID();
 			ids[2] = server.getActiveCourse().getID();
-		} else throw new UserNotLoggedException(); 
+		} else throw new UserNotLoggedException();
 		
 		return ids;
 	}
@@ -503,8 +503,8 @@ public class Proxy {
 		out.println("<html>");
 		out.println("<body>");
 		out.println("<center>");
-		out.println("<h1>Validación de credenciales correcta</h1>\n");
-		out.println("<h3>:)</h3>\n");
+		out.println("<h1>¡Bienvenido!</h1>\n");
+		out.println("<h3>Puedes comenzar a trabajar en Eclipse</h3>\n");
 		out.println("</center>");
 		out.println("</body>");
 		out.println("</html>");
@@ -514,6 +514,7 @@ public class Proxy {
 				my_console.println("["+new Date().toString()+"] OK: La tarea ha sido descargada con éxito");
 			}
 		});
+		
 	}
 	
 }

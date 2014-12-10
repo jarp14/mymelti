@@ -1,5 +1,8 @@
 package com.chico.esiuclm.melti.gui.views;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -12,6 +15,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -32,6 +36,7 @@ import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.IServiceLocator;
 
+import com.chico.esiuclm.melti.MeltiPlugin;
 import com.chico.esiuclm.melti.gui.Controller;
 import com.chico.esiuclm.melti.model.WrappedSolution;
 
@@ -160,6 +165,7 @@ public class SolutionsView extends ViewPart {
 				refreshSolutions();
 			}
 		};
+		refreshAction.setImageDescriptor(getImageDescriptor("refresh.png"));
 	}
 	
 	private void createContextMenu() {
@@ -230,14 +236,23 @@ public class SolutionsView extends ViewPart {
 		}
 	}
 	
-	/*private void createMenu() {
-		IMenuManager mgr = getViewSite().getActionBars().getMenuManager();
-		mgr.add(selectAllAction);
-	}*/
-
 	private void createToolbar() {
 		IToolBarManager mgr = getViewSite().getActionBars().getToolBarManager();
 		mgr.add(refreshAction);
+	}
+	
+	private ImageDescriptor getImageDescriptor(String relativePath) {
+		String iconPath = "icons/";
+		try {
+			MeltiPlugin plugin = MeltiPlugin.getDefault();
+			@SuppressWarnings("deprecation")
+			URL installURL = plugin.getDescriptor().getInstallURL();
+			URL url = new URL(installURL, iconPath+relativePath);
+			return ImageDescriptor.createFromURL(url);
+		} catch(MalformedURLException e) {
+			return ImageDescriptor.getMissingImageDescriptor();
+		}
+		
 	}
 
 }

@@ -216,7 +216,7 @@
             class="com.chico.esiuclm.melti.gui.views.MyTasksView"
             icon="icons/mytasks.png"
             id="com.chico.esiuclm.melti.views.mytasksView"
-            name="Mis Tareas"
+            name="Mis soluciones"
             restorable="true">
       </view>
    </extension>

@@ -18,7 +18,6 @@ public class StatementView extends ViewPart {
 
 	public static final String ID = "com.chico.esiuclm.melti.views.statementView";
 	private TextViewer viewer;
-	// TODO permitir copiar el enunciado
 	
 	public StatementView() {
 		super();
